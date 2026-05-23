@@ -1,0 +1,51 @@
+{
+  "name": "email-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon index.js",
+    "start:producer": "nodemon ./src/kafka/producer.js",
+
+    "start:emailConsumer": "node ./src/kafka/consumer/emailConsumer.js",
+    "start:emailWorker": "nodemon ./src/workers/emailWorker.js",
+
+
+    "start:apiKeyConsumer": "node ./src/kafka/consumer/apiKeyConsumer.js",
+    "start:apiKeyWorker": "nodemon ./src/workers/apiKeyWorker.js",
+
+
+    "start:userConsumer": "node ./src/kafka/consumer/userActivityConsumer.js",
+    "start:userWorker": "nodemon ./src/workers/userActivityWorker.js",
+
+    "start:dlqWorker": "nodemon ./src/workers/dlqWorker.js",
+    "start:sentEmailWorker": "nodemon ./src/workers/sentEmailWorker.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sushilbhattarai45/email-system.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sushilbhattarai45/email-system/issues"
+  },
+  "homepage": "https://github.com/sushilbhattarai45/email-system#readme",
+  "dependencies": {
+    "axios": "^1.14.0",
+    "bcrypt": "^6.0.0",
+    "bullmq": "^5.72.1",
+    "cors": "^2.8.6",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "ioredis": "^5.10.1",
+    "jsonwebtoken": "^9.0.3",
+    "kafkajs": "^2.2.4",
+    "mongoose": "^9.4.1",
+    "nodemailer": "^8.0.4",
+    "nodemon": "^3.1.14",
+    "zod": "^4.3.6"
+  }
+}
