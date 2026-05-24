@@ -38,6 +38,7 @@ const transporter = nodemailer.createTransport({
   }
 })();
 
+
 let counter = 0;
 const worker = new Worker(
   "emailQueue",
@@ -110,7 +111,7 @@ const sendEmail = async (jobData, workerHistory) => {
 try{
 
   console.log("Mail options:", mailOptions);  
-  await transporter.sendMail(mailOptions);
+  // await transporter.sendMail(mailOptions);
   console.log("Email sent successfully to:", fields.to);
 
   sentEmailQueue.add(
