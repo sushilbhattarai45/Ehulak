@@ -30,6 +30,11 @@ const transporter = nodemailer.createTransport({
 });
 
 (async () => {
+
+  console.log("SMTP_HOST:", process.env.SMTP_HOST);
+  console.log("SMTP_PORT:", process.env.SMTP_PORT);
+  console.log("SMTP_USER:", process.env.SMTP_USER);
+  console.log("SMTP_PASSWORD:", process.env.SMTP_PASSWORD);
   try {
     await transporter.verify();
     console.log(" Email transporter is ready");
@@ -107,11 +112,12 @@ const sendEmail = async (jobData, workerHistory) => {
     to: fields.to,
     subject: fields.subject,
     text: fields.text,
+
   };
 try{
 
   console.log("Mail options:", mailOptions);  
-  // await transporter.sendMail(mailOptions);
+  await transporter.sendMail(mailOptions);
   console.log("Email sent successfully to:", fields.to);
 
   sentEmailQueue.add(
