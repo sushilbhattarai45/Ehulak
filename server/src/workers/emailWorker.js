@@ -11,22 +11,22 @@ import {
 import dotenv from "dotenv";
 dotenv.config();
 
-
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
+  port: Number(process.env.SMTP_PORT),
   secure: false,
-
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
   },
-
   pool: true,
   maxConnections: 4,
   maxMessages: 100,
   rateDelta: 1000,
   rateLimit: 4,
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 (async () => {
