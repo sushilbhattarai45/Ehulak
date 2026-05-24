@@ -12,6 +12,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
+
 app.use(express.json());
 connectDb();
 console.log("connecting to kafka and creating topics...");
