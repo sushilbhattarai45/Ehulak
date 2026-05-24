@@ -1,12 +1,20 @@
 import { useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
 import { classNames } from "../lib/format.js";
-import axios from "axios";
-import axiosInstance from "../components/api/axiosInstance.js";
-export default function Auth() {
+import { Mail, Zap, Activity, KeyRound, ArrowLeft } from "lucide-react";
 
-  const [mode, setMode] = useState("signin");
+const FEATURES = [
+  { icon: Zap, label: "Event-driven pipeline" },
+  { icon: Activity, label: "Real-time delivery tracking" },
+  { icon: KeyRound, label: "API keys & DLQ built in" },
+];
+
+export default function Auth() {
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState(() =>
+    searchParams.get("mode") === "signup" ? "signup" : "signin",
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -15,8 +23,7 @@ export default function Auth() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!email || !password) {
-      // Show error toast via context
-      import('sonner').then(({ toast }) => toast.error('Email and password required'));
+      import("sonner").then(({ toast }) => toast.error("Email and password required"));
       return;
     }
     let success = false;
@@ -25,87 +32,184 @@ export default function Auth() {
     } else if (mode === "signup") {
       success = await signup(email, password);
     } else {
-      import('sonner').then(({ toast }) => toast.error('Invalid mode'));
+      import("sonner").then(({ toast }) => toast.error("Invalid mode"));
       return;
     }
     if (success) {
       navigate("/dashboard");
     }
   }
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 bg-background">
-      <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2 justify-center mb-8">
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,oklch(0.72_0.14_155/0.12),transparent)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 bg-[linear-gradient(to_right,oklch(0.26_0.012_250/0.4)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.26_0.012_250/0.4)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_75%)]"
+      />
+
+      <header className="relative z-10 flex items-center justify-between px-5 sm:px-8 h-14 border-b border-border/60">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-base">
           <div className="h-7 w-7 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
-            <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+            <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_12px_oklch(0.72_0.14_155)]" />
           </div>
           <span className="font-semibold tracking-tight text-lg">Ehulak</span>
-        </div>
+        </Link>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-base"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Home
+        </Link>
+      </header>
 
-        <div className="rounded-lg border border-border bg-card p-6">
-          <div className="text-center mb-6">
-            <h1 className="text-lg font-semibold tracking-tight">
-              {mode === "signin" ? "Welcome back" : "Create your account"}
-            </h1>
-            <p className="text-xs text-muted-foreground mt-1">
+      <main className="relative z-10 flex-1 flex flex-col justify-center px-5 sm:px-8 py-6 sm:py-8">
+        <div className="max-w-4xl mx-auto w-full grid lg:grid-cols-[1fr_auto] gap-10 lg:gap-16 items-center">
+          <div className="hidden lg:block text-left">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs text-muted-foreground mb-5">
+              <Mail className="h-3.5 w-3.5 text-primary" />
+              <span>
+                <span className="text-primary font-medium">e</span>-hulak · electronic post office
+              </span>
+            </div>
+
+            <h2 className="text-2xl font-semibold tracking-tight leading-snug">
+              {mode === "signin" ? "Welcome back to your" : "Start sending with your"}{" "}
+              <span className="text-primary">delivery dashboard</span>
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground max-w-sm leading-relaxed">
               {mode === "signin"
-                ? "Sign in to your delivery dashboard"
-                : "Start sending in under a minute"}
+                ? "Monitor emails, manage API keys, and recover failed sends — all in one place."
+                : "Create an account and get your API key in under a minute. No credit card needed."}
             </p>
+
+            <ul className="mt-8 space-y-3">
+              {FEATURES.map(({ icon: Icon, label }) => (
+                <li key={label} className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-8 w-8 shrink-0 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Icon className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  {label}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-10 rounded-lg border border-border/80 bg-card/40 px-4 py-3 max-w-sm">
+              <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
+                Pipeline flow
+              </p>
+              <p className="text-xs font-mono text-foreground">
+                queue <span className="text-muted-foreground">→</span> worker{" "}
+                <span className="text-muted-foreground">→</span>{" "}
+                <span className="text-primary">delivered</span>
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-1 p-1 rounded-md bg-muted/60 mb-5">
-            {[
-              { v: "signin", l: "Sign in" },
-              { v: "signup", l: "Sign up" },
-            ].map((t) => (
+          <div className="w-full max-w-sm mx-auto lg:mx-0 lg:w-[380px]">
+            <div className="lg:hidden flex items-center gap-2 justify-center mb-6">
+              <div className="h-7 w-7 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
+                <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+              </div>
+              <span className="font-semibold tracking-tight text-lg">Ehulak</span>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card/80 backdrop-blur-sm p-6 shadow-2xl shadow-black/10">
+              <div className="text-center mb-6">
+                <h1 className="text-lg font-semibold tracking-tight">
+                  {mode === "signin" ? "Welcome back" : "Create your account"}
+                </h1>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {mode === "signin"
+                    ? "Sign in to your delivery dashboard"
+                    : "Start sending in under a minute"}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-1 p-1 rounded-md bg-muted/60 mb-5">
+                {[
+                  { v: "signin", l: "Sign in" },
+                  { v: "signup", l: "Sign up" },
+                ].map((t) => (
+                  <button
+                    key={t.v}
+                    type="button"
+                    onClick={() => setMode(t.v)}
+                    className={classNames(
+                      "h-8 rounded text-xs font-medium transition-base",
+                      mode === t.v
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {t.l}
+                  </button>
+                ))}
+              </div>
+
               <button
-                key={t.v}
-                onClick={() => setMode(t.v)}
-                className={classNames(
-                  "h-8 rounded text-xs font-medium transition-base",
-                  mode === t.v
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
+                type="button"
+                className="w-full h-9 rounded-md border border-border bg-background hover:bg-accent text-sm font-medium flex items-center justify-center gap-2 transition-base"
               >
-                {t.l}
+                <GoogleIcon />
+                Continue with Google
               </button>
-            ))}
-          </div>
 
-          <button
-            type="button"
-            className="w-full h-9 rounded-md border border-border bg-background hover:bg-accent text-sm font-medium flex items-center justify-center gap-2 transition-base"
-          >
-            <GoogleIcon />
-            Continue with Google
-          </button>
+              <div className="flex items-center gap-3 my-5">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  or
+                </span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
 
-          <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">or</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <Field
+                  label="Email"
+                  type="email"
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <Field
+                  label="Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="w-full h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base shadow-[0_0_20px_oklch(0.72_0.14_155/0.2)]"
+                  disabled={loading}
+                >
+                  {loading
+                    ? mode === "signin"
+                      ? "Signing in..."
+                      : "Creating..."
+                    : mode === "signin"
+                      ? "Sign in"
+                      : "Create account"}
+                </button>
+              </form>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {/* {mode === "signup" && <Field label="Name" type="text" placeholder="Ada Lovelace" />} */}
-            <Field label="Email" type="email" placeholder="you@company.com" value={email} onChange={e => setEmail(e.target.value)} />
-            <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} />
-            <button
-              type="submit"
-              className="w-full h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base"
-              disabled={loading}
-            >
-              {loading ? (mode === "signin" ? "Signing in..." : "Creating...") : (mode === "signin" ? "Sign in" : "Create account")}
-            </button>
-          </form>
-
-          <div className="mt-5 text-center text-[11px] text-muted-foreground">
-            By continuing you agree to our Terms and Privacy Policy.
+              <div className="mt-5 text-center text-[11px] text-muted-foreground">
+                By continuing you agree to our Terms and Privacy Policy.
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      <footer className="relative z-10 px-5 sm:px-8 py-3 border-t border-border/60">
+        <p className="text-center text-[11px] text-muted-foreground max-w-4xl mx-auto">
+          Queue → worker → delivery · Built for teams who care about deliverability
+        </p>
+      </footer>
     </div>
   );
 }

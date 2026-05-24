@@ -63,9 +63,7 @@ export const getAPiKeyForUser = async (req, res) => {
     const userId = req.user.userId;
     //check in redis first
     const cachedKey = await redisConfig.get(`userApiKey:${userId}`);
-console.log("Cached API key data:", cachedKey.apiKey);
-
-
+    console.log("Cached key in getAPiKeyForUser:", cachedKey);
     if (cachedKey) {
       console.log("API key found in cache for user ID:", userId);
       return res.json({

@@ -21,7 +21,9 @@ export const authMiddleware = (req, res, next) => {
           .json({ success: false, message: "Invalid token" });
       }
       console.log("Decoded token in authMiddleware:", decoded);
-      req.user = decoded; // Attach decoded user info to request object
+      req.user = decoded;
+      
+      console.log("Decoded user in authMiddleware:", req.user); // Attach decoded user info to request object
       next();
     });
   } catch (error) {

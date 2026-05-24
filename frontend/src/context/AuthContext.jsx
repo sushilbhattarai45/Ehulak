@@ -77,19 +77,20 @@ export const AuthProvider = ({ children }) => {
         accountType: "local",
         status: "active",
       });
-      const userData = res.data.user || res.data;
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-      // No accessToken on signup? If yes, handle like login:
-      if (res.data.accessToken) {
-        setAccessToken(res.data.accessToken);
-        localStorage.setItem("accessToken", res.data.accessToken);
-      }
-      // Fetch and store API key
-      if (userData && (userData._id || userData.userId))
-        await fetchApiKey(userData._id || userData.userId);
-      toast.success("Account created successfully");
-      return true;
+      // const userData = res.data.user || res.data;
+      // setUser(userData);
+      // localStorage.setItem("user", JSON.stringify(userData));
+      // // No accessToken on signup? If yes, handle like login:
+      // if (res.data.accessToken) {
+      //   setAccessToken(res.data.accessToken);
+      //   localStorage.setItem("accessToken", res.data.accessToken);
+      //   alert("accessToken: " + res.data.accessToken);
+      // }
+      // // Fetch and store API key
+      
+      // toast.success("Account created successfully");
+      // return true;
+      toast.error("Account created Successfully. Please login to continue.");
     } catch (e) {
       toast.error(e?.response?.data?.message || "Signup failed");
       return false;

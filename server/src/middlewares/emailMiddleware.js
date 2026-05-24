@@ -19,6 +19,7 @@ export const emailMiddleware = async (req, res, next) => {
     console.log("Hashed API key in emailMiddleware:", keyHash);
    
     const cachedKey = await redisConfig.get(`apiKey:${keyHash}`);
+
     if (cachedKey) {
       const cachedData = JSON.parse(cachedKey);
       if (!cachedData.isActive) {
@@ -28,6 +29,7 @@ export const emailMiddleware = async (req, res, next) => {
       }
       console.log("API key found in Redis cache, proceeding to email controller");
       req.user = { userId: cachedData.userId }; 
+      console.log("User ID from cached API key:", req.user.userId);
       return next();
     }
 
@@ -47,6 +49,7 @@ export const emailMiddleware = async (req, res, next) => {
         .json({ success: false, message: "API key is not active" });
     }
     console.log("API key is valid, proceeding to email controller");
+    req.user = { userId: apiKeyRecord.userId };
     next();
   } catch (error) {
     console.error("Error in emailMiddleware:", error);

@@ -1,5 +1,4 @@
-import { classNames } from "../lib/format.js";
-import { absoluteTime } from "../lib/format.js";
+import { classNames, absoluteTime, relativeTime } from "../lib/format.js";
 
 const STAGE_COLOR = {
   created: "bg-info",
@@ -28,8 +27,8 @@ export default function Timeline({ events }) {
             <div className="font-mono text-xs uppercase tracking-wider text-foreground">
               {e.stage}
             </div>
-            <div className="font-mono text-[11px] text-muted-foreground">
-              {absoluteTime(e.ts)}
+            <div className="font-mono text-[11px] text-muted-foreground" title={absoluteTime(e.ts)}>
+              {relativeTime(e.ts)}
             </div>
           </div>
           {e.worker && (

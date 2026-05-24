@@ -3,7 +3,7 @@ import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
 import DataTable from "../components/DataTable.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import { maskEmail, relativeTime } from "../lib/format.js";
+import { maskEmail, relativeTime, absoluteTime } from "../lib/format.js";
 
 export default function DLQ() {
   const [retried, setRetried] = useState({});
@@ -34,7 +34,18 @@ export default function DLQ() {
       label: "Campaign",
       render: (r) => <span className="text-xs">{r.subject || "—"}</span>,
     },
-    { key: "ts", label: "Failed", render: (r) => <span className="text-xs text-muted-foreground">{relativeTime(r.timestamp)}</span> },
+    {
+      key: "ts",
+      label: "Failed",
+      render: (r) => (
+        <div className="text-xs">
+          <div className="text-foreground">{relativeTime(r.timestamp)}</div>
+          <div className="font-mono text-[11px] text-muted-foreground">
+            {absoluteTime(r.timestamp)}
+          </div>
+        </div>
+      ),
+    },
     {
       key: "action",
       label: "",

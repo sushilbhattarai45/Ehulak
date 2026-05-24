@@ -8,6 +8,7 @@ let count = 0;
 export async function processEmail(req, res) {
   const { to, from } = req.body;
   try {
+    console.log("Received email processing request with body:", req.body);
     const data = {
       to: to,
       from: from,
@@ -17,8 +18,8 @@ export async function processEmail(req, res) {
       userId: req.user.userId,
       messageId: crypto.randomUUID(),
     };
-    count = count + 1;
-    console.log("Received email processing request:", count);
+
+    console.log("Received email processing request:", data);
     producer({
       type: "email",
       action: "sendEmail",
@@ -29,7 +30,7 @@ export async function processEmail(req, res) {
       .json({ message: `Email details for ID: fetched successfully!` });
   } catch (error) {
     // console.error("Error fetching email details:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 }
 

@@ -9,6 +9,7 @@ import ApiKeys from "./pages/ApiKeys.jsx";
 import Logs from "./pages/Logs.jsx";
 import Docs from "./pages/Docs.jsx";
 import Auth from "./pages/Auth.jsx";
+import Landing from "./pages/Landing.jsx";
 
 // Context providers
 import { ThemeProvider } from "./hooks/useTheme.jsx";
@@ -25,7 +26,7 @@ function PrivateRoute({ children }) {
 function AuthRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user ? <Navigate to="/" replace /> : children;
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/auth" element={
               <AuthRoute>
                 <Auth />
