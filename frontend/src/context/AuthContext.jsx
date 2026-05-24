@@ -184,10 +184,10 @@ const logout = () => {
 }, []);
 
   useEffect(() => {
-    if (!emailEvents.emails.length) {
+    if (apiKey&& !emailEvents.emails.length) {
       getEmailEvents(1);
     }
-    if (!dlqEmails.emails.length) {
+    if (apiKey&& !dlqEmails.emails.length) {
       getDLQEmails(1);
     }
   }, [user]);
