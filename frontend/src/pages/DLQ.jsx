@@ -32,7 +32,7 @@ export default function DLQ() {
     {
       key: "campaign",
       label: "Campaign",
-      render: (r) => <span className="text-xs">{r.subject || "—"}</span>,
+      render: (r) => <span className="text-xs">{r?.campaign || "—"}</span>,
     },
     {
       key: "ts",

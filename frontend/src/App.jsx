@@ -24,8 +24,7 @@ function PrivateRoute({ children }) {
 
 // Redirect to dashboard if already logged in
 function AuthRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return null;
+  const { user } = useAuth();
   return user ? <Navigate to="/dashboard" replace /> : children;
 }
 

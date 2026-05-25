@@ -3,6 +3,12 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { classNames } from "../lib/format.js";
 import { Mail, Zap, Activity, KeyRound, ArrowLeft } from "lucide-react";
+import Modal from "../components/Modal.jsx";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "../components/ui/input-otp";
 
 const FEATURES = [
   { icon: Zap, label: "Event-driven pipeline" },
@@ -17,8 +23,23 @@ export default function Auth() {
   );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [signupStarting, setSignupStarting] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [pendingLogin, setPendingLogin] = useState(null);
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
   const navigate = useNavigate();
-  const { login, signup, loading } = useAuth();
+  const {
+    login,
+    signup,
+    createOtp,
+    validateOtp,
+    completeFirstLogin,
+    loading,
+  } = useAuth();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -26,16 +47,81 @@ export default function Auth() {
       import("sonner").then(({ toast }) => toast.error("Email and password required"));
       return;
     }
-    let success = false;
+
     if (mode === "signin") {
-      success = await login(email, password);
-    } else if (mode === "signup") {
-      success = await signup(email, password);
-    } else {
-      import("sonner").then(({ toast }) => toast.error("Invalid mode"));
+      const result = await login(email, password);
+      if (!result?.success) return;
+
+      if (result.needsProfile) {
+        setPendingLogin({ user: result.user, accessToken: result.accessToken });
+        setShowProfileModal(true);
+        return;
+      }
+      navigate("/dashboard");
       return;
     }
-    if (success) {
+
+    if (mode === "signup") {
+      await handleSignupStart();
+    }
+  }
+
+  async function handleSignupStart() {
+    setSignupStarting(true);
+    setOtp("");
+    setShowOtpModal(true);
+    setOtpLoading(true);
+    const sent = await createOtp(email);
+    setOtpLoading(false);
+    setSignupStarting(false);
+    if (!sent) setShowOtpModal(false);
+  }
+
+  async function handleOtpVerify() {
+    if (otp.length !== 6) {
+      import("sonner").then(({ toast }) => toast.error("Enter the 6-digit code"));
+      return;
+    }
+    setOtpLoading(true);
+    const valid = await validateOtp(email, otp);
+    if (!valid) {
+      setOtpLoading(false);
+      return;
+    }
+
+    const registered = await signup(email, password);
+    setOtpLoading(false);
+    if (registered) {
+      setShowOtpModal(false);
+      setMode("signin");
+      setOtp("");
+    }
+  }
+
+  async function handleResendOtp() {
+    setOtpLoading(true);
+    await createOtp(email);
+    setOtpLoading(false);
+  }
+
+  async function handleProfileSubmit(e) {
+    e.preventDefault();
+    if (!name.trim() || !organization.trim()) {
+      import("sonner").then(({ toast }) =>
+        toast.error("Name and organization are required"),
+      );
+      return;
+    }
+    const ok = await completeFirstLogin(
+      pendingLogin.user,
+      pendingLogin.accessToken,
+      
+      name.trim(),
+      organization.trim(),
+    );
+    if (ok) {
+      setShowProfileModal(false);
+      setPendingLogin(null);
       navigate("/dashboard");
     }
   }
@@ -185,15 +271,15 @@ export default function Auth() {
                 <button
                   type="submit"
                   className="w-full h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base shadow-[0_0_20px_oklch(0.72_0.14_155/0.2)]"
-                  disabled={loading}
+                  disabled={loading || signupStarting}
                 >
                   {loading
-                    ? mode === "signin"
-                      ? "Signing in..."
-                      : "Creating..."
-                    : mode === "signin"
-                      ? "Sign in"
-                      : "Create account"}
+                    ? "Signing in..."
+                    : signupStarting
+                      ? "Sending code..."
+                      : mode === "signin"
+                        ? "Sign in"
+                        : "Create account"}
                 </button>
               </form>
 
@@ -210,6 +296,81 @@ export default function Auth() {
           Queue → worker → delivery · Built for teams who care about deliverability
         </p>
       </footer>
+
+      <Modal
+        open={showOtpModal}
+        onClose={() => setShowOtpModal(false)}
+        title="Verify your email"
+        subtitle={email}
+      >
+        <p className="text-sm text-muted-foreground mb-5">
+          {otpLoading && otp.length === 0
+            ? "Sending verification code..."
+            : "Enter the 6-digit code sent to your email to complete signup."}
+        </p>
+        <div className="flex justify-center mb-6">
+          <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={otpLoading && otp.length === 0}>
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
+        <button
+          type="button"
+          onClick={handleOtpVerify}
+          disabled={otpLoading || otp.length !== 6}
+          className="w-full h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base disabled:opacity-50"
+        >
+          {otpLoading ? "Verifying..." : "Verify & create account"}
+        </button>
+        <button
+          type="button"
+          onClick={handleResendOtp}
+          disabled={otpLoading}
+          className="w-full mt-2 h-9 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-base disabled:opacity-50"
+        >
+          Resend code
+        </button>
+      </Modal>
+
+      <Modal
+        open={showProfileModal}
+        onClose={() => {}}
+        title="Complete your profile"
+        subtitle={pendingLogin?.user?.email}
+      >
+        <p className="text-sm text-muted-foreground mb-5">
+          Welcome! Tell us a bit about yourself before continuing.
+        </p>
+        <form onSubmit={handleProfileSubmit} className="space-y-3">
+          <Field
+            label="Name"
+            type="text"
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Field
+            label="Organization"
+            type="text"
+            placeholder="Company or team name"
+            value={organization}
+            onChange={(e) => setOrganization(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base disabled:opacity-50"
+          >
+            {loading ? "Saving..." : "Continue to dashboard"}
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 }

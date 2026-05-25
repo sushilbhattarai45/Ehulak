@@ -64,9 +64,9 @@ export default function Dashboard() {
       ),
     },
     {
-      key: "subject",
+      key: "campaign",
       label: "Campaign",
-      render: (r) => <span className="text-xs text-foreground">{r.subject}</span>,
+      render: (r) => <span className="text-xs text-foreground">{r?.campaign || "—"}</span>,
     },
     {
       key: "status",

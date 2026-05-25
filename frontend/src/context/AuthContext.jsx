@@ -45,24 +45,47 @@ export const AuthProvider = ({ children }) => {
     return null;
   };
 
+  const createOtp = async (email) => {
+    try {
+      await axiosInstance.post("/auth/generateOtp", { email });
+      toast.success("Verification code sent to your email");
+      return true;
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to send verification code");
+      return false;
+    }
+  };
+
+  const validateOtp = async (email, otp) => {
+    try {
+      await axiosInstance.post("/auth/validateOtp", { email, otp });
+      return true;
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Invalid verification code");
+      return false;
+    }
+  };
+
   const login = async (email, password) => {
     setLoading(true);
     try {
       const res = await axiosInstance.post("/auth/login", { email, password });
-      // Expecting: { success, message, accessToken, user }
       const { accessToken: token, user: userData } = res.data;
-      setUser(userData);
       setAccessToken(token);
-      localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("accessToken", token);
-      // Fetch and store API key
-      if (userData && (userData._id || userData.userId))
-        await fetchApiKey(userData._id || userData.userId);
+
+      if (userData?.firstTimeLogin) {
+        return { success: true, needsProfile: true, user: userData, accessToken: token };
+      }
+
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      if (userData?.userId) await fetchApiKey(userData.userId);
       toast.success("Signed in successfully");
-      return true;
+      return { success: true, needsProfile: false };
     } catch (e) {
       toast.error(e?.response?.data?.message || "Login failed");
-      return false;
+      return { success: false };
     } finally {
       setLoading(false);
     }
@@ -71,32 +94,50 @@ export const AuthProvider = ({ children }) => {
   const signup = async (email, password) => {
     setLoading(true);
     try {
-      const res = await axiosInstance.post("/auth/register", {
+      await axiosInstance.post("/auth/register", {
         email,
         password,
         accountType: "local",
         status: "active",
       });
-      // const userData = res.data.user || res.data;
-      // setUser(userData);
-      // localStorage.setItem("user", JSON.stringify(userData));
-      // // No accessToken on signup? If yes, handle like login:
-      // if (res.data.accessToken) {
-      //   setAccessToken(res.data.accessToken);
-      //   localStorage.setItem("accessToken", res.data.accessToken);
-      //   alert("accessToken: " + res.data.accessToken);
-      // }
-      // // Fetch and store API key
-      
-      // toast.success("Account created successfully");
-      // return true;
-      toast.error("Account created Successfully. Please login to continue.");
+      toast.success("Account created. Please sign in to continue.");
+      return true;
     } catch (e) {
       toast.error(e?.response?.data?.message || "Signup failed");
       return false;
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateUser = async (userId, name, email, organization) => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post("/auth/updateUser", {
+        userId,
+        name,
+        email,
+        organization,
+      });
+      const userData = res.data.user;
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      if (userData?.userId) await fetchApiKey(userData.userId);
+      toast.success("Profile updated successfully");
+      return true;
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to update profile");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const completeFirstLogin = async (pendingUser, accessToken, name, organization) => {
+    setAccessToken(accessToken);
+    localStorage.setItem("accessToken", accessToken);
+    const ok = await updateUser(pendingUser.userId, name, organization);
+    return ok;
   };
 
 const logout = () => {
@@ -204,6 +245,10 @@ const logout = () => {
         loading,
         login,
         signup,
+        createOtp,
+        validateOtp,
+        updateUser,
+        completeFirstLogin,
         logout,
         apiKey,
         accessToken,
