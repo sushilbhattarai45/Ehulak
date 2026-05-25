@@ -357,8 +357,11 @@ await producer({
   emailData: {
     from: "noreply@ehulak.tech",
     to: email,
-    subject: "OTP for login",
+    campaign: "OTP for login",
+    subject: "OTP for login from Ehulak",
     body: `Your OTP for login is ${otp}`,
+    html:`"<div style=\"margin:0;padding:0;background:#0b0f1a;font-family:Arial,sans-serif;\"><div style=\"max-width:600px;margin:40px auto;background:#111827;border-radius:0px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);\"><div style=\"background:linear-gradient(135deg,#6d28d9,#2563eb);padding:30px;text-align:center;color:white;\"><h1 style=\"margin:0;font-size:24px;\">Ehulak Security Code</h1><p style=\"margin:8px 0 0;opacity:0.9;\">One-Time Password Verification</p></div><div style=\"padding:40px;text-align:center;color:#e5e7eb;\"><p style=\"font-size:16px;margin-bottom:20px;color:#9ca3af;\">Use the OTP below to continue your action</p><div style=\"font-size:36px;letter-spacing:8px;font-weight:bold;background:#0f172a;padding:16px 20px;border-radius:12px;display:inline-block;border:1px solid #1f2937;\">6578</div><p style=\"margin-top:25px;font-size:14px;color:#6b7280;\">This code will expire in 10 minutes. Do not share it with anyone.</p><a href=\"#\" style=\"display:inline-block;margin-top:25px;padding:12px 20px;background:#2563eb;color:white;text-decoration:none;border-radius:8px;font-weight:bold;\">Secure Account</a></div><div style=\"padding:20px;text-align:center;font-size:12px;color:#6b7280;border-top:1px solid #1f2937;\">Sent from <b>noreply@ehulak.tech</b></div></div></div>"
+}`,
     userId: "1234567890",
   },
 });

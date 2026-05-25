@@ -13,8 +13,8 @@ dotenv.config();
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
+  port: process.env.SMTP_PORT,
+  secure: true,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
@@ -93,8 +93,8 @@ const worker = new Worker(
 const getEmailFields = (emailData) => {
   const payload = emailData.emailData || emailData;
   return {
-    from: payload.from,
     to: payload.to,
+    from: 'noreply@ehulak.tech',
     subject: payload.subject,
     text: payload.text || payload.body,
     body: payload.body || payload.text,

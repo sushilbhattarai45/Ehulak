@@ -6,16 +6,15 @@ import mongoose from "mongoose";
 let count = 0;
 
 export async function processEmail(req, res) {
-  const { to, from, subject, body, html,campaign } = req.body;
+  const { to,  subject, body, html,campaign } = req.body;
 
-  if(!to || !from || !subject || !body || !campaign) {
+  if(!to  || !subject || !body || !campaign) {
     return res.status(400).json({ error: "All fields are required" });
   }
   try {
     console.log("Received email processing request with body:", req.body);
     const data = {
       to: to,
-      from: from,
       subject: subject,
       body: body,
       html: html,
