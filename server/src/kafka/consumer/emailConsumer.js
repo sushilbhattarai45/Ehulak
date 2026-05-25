@@ -16,6 +16,7 @@ async function consumer() {
      console.log(`Message content: ${message.value.toString()}`);
       const parsed = JSON.parse(message.value.toString());
       const emailPayload = parsed.emailData || parsed;
+      console.log("Email payload:", JSON.stringify(emailPayload));  
       if (!emailPayload.messageId) {
         emailPayload.messageId = crypto.randomUUID();
       }

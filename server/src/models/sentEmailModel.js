@@ -22,6 +22,8 @@ const sentEmailSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   body: { type: String, required: true },
   messageId: { type: String },
+  campaign: { type: String, required: true },
+  html: { type: String, required: false },
   status: { type: String, enum: ["sent", "failed"], default: "sent" },
   errorMessage: { type: String },
   workerHistory: { type: [workerHistoryEntrySchema], default: [] },

@@ -98,7 +98,9 @@ const getEmailFields = (emailData) => {
     subject: payload.subject,
     text: payload.text || payload.body,
     body: payload.body || payload.text,
+    html: payload.html,
     userId: payload.userId,
+    campaign: payload.campaign,
     messageId: payload.messageId,
   };
 };
@@ -112,13 +114,14 @@ const sendEmail = async (jobData, workerHistory) => {
     to: fields.to,
     subject: fields.subject,
     text: fields.text,
-
+    html: fields.html,
+    campaign: fields.campaign,
   };
 try{
 
   console.log("Mail options:", mailOptions);  
   await transporter.sendMail(mailOptions);
-  console.log("Email sent successfully to:", fields.to);
+  console.log("Email sent successfully to:", JSON.stringify(fields));
 
   sentEmailQueue.add(
     "sentEmail",
@@ -127,6 +130,8 @@ try{
       to: fields.to,
       subject: fields.subject,
       body: fields.body,
+      html: fields.html,
+      campaign: fields.campaign,
       userId: fields.userId,
       messageId: fields.messageId,
       sentAt: new Date(),

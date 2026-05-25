@@ -141,6 +141,14 @@ export const login = async (req, res) => {
       });
     }
 
+  if( user.status !="active")
+  {
+    return res.status(401).json({
+      success: false,
+      message: "User is not active",
+    });
+  }
+
     // 7. Generate tokens
     const accessToken = jwt.sign(
       { userId: user.userId, email: user.email },
@@ -161,6 +169,12 @@ export const login = async (req, res) => {
       sameSite: "Strict",
     });
 
+    let firstTimeLogin = user.firstTimeLogin;
+    if (firstTimeLogin === undefined) {
+      const dbUser = await User.findOne({ email });
+      firstTimeLogin = dbUser?.firstTimeLogin ?? true;
+    }
+
     // 9. Response
     return res.json({
       success: true,
@@ -172,6 +186,8 @@ export const login = async (req, res) => {
         name: user.name,
         image: user.image,
         accountType: user.accountType,
+        firstTimeLogin,
+        organization: user.organization || null,
       },
     });
   } catch (error) {
@@ -239,6 +255,7 @@ export const registerUser = async (req, res) => {
       accountType,
       status: status || "active",
       password: hashedPassword,
+      firstTimeLogin: true,
     };
 
     // 6. Cache in Redis (use email as key)
@@ -281,11 +298,15 @@ export const updateUser = async (req, res) => {
         success: false,
         message: "User not found",
       });
+
     }
 
+    console.log(req.body);
     user.name = name || user.name;
     user.image = image || user.image;
     user.organization = organization || user.organization;
+    user.status = "active";
+    user.firstTimeLogin = false;
 
     await user.save();
 
@@ -298,9 +319,12 @@ export const updateUser = async (req, res) => {
       user: {
         userId: user.userId,
         email: user.email,
+        status: 'active',
         name: user.name,
         image: user.image,
         accountType: user.accountType,
+        userStatus: user.status,
+        firstTimeLogin: user.firstTimeLogin,
         organization: user.organization || null,
       },
     });
@@ -310,5 +334,71 @@ export const updateUser = async (req, res) => {
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+
+export const createOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    console.log("Creating OTP for email:", email);
+    //generate a 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    console.log("OTP:", otp);
+// set the OTP in redis with the email as the key and the OTP as the value and the expiration time as 5 minutes
+    await redisConfig.set(`otp:${email}`, otp, "EX", 60 * 5);
+
+
+await producer({
+  type: "email",
+  action: "sendEmail",
+  emailData: {
+    from: "noreply@ehulak.tech",
+    to: email,
+    subject: "OTP for login",
+    body: `Your OTP for login is ${otp}`,
+    userId: "1234567890",
+  },
+});
+
+
+    return res.json({
+      success: true,
+      message: "OTP created successfully", otp: otp    });
+    
+
+  } catch (error) {
+    console.error("Create OTP error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const validateOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const storedOTP = await redisConfig.get(`otp:${email}`);
+    if (!storedOTP) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP not found",
+      });
+    }
+    if (String(storedOTP) !== String(otp)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    await redisConfig.del(`otp:${email}`);
+    return res.json({ success: true, message: "OTP validated successfully" });
+  } catch (error) {
+    console.error("Validate OTP error:", error);
+    return res.status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };

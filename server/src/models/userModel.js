@@ -6,8 +6,13 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   name: { type: String, required: false },
   image: { type: String },
-  status: { type: String, enum: ["active", "inactive"], default: "active" },
+  status: { type: String, enum: ["active", "inactive"], default: "inactive" },
   accountType: { type: String, enum: ["google", "local"], default: "local" },
+  firstTimeLogin: {
+    type: Boolean,
+    default: true,
+  },
+  organization: { type: String },
   password: {
     type: String,
     required: function () {

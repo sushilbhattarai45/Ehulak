@@ -74,6 +74,8 @@ const sendToDlqDB = async (data) => {
       body: data.jobData.emailData.body,
       userId: data.jobData.emailData.userId,
       errorMessage: data.error,
+      campaign: data.jobData.emailData.campaign,
+      html: data.jobData.emailData.html,
     };
     console.log("Data object to be saved to DLQ database:", dataObject);
     const saveData = await dlqEmailModel.create(dataObject);

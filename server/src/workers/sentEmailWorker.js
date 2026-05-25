@@ -22,6 +22,8 @@ dotenv.config();
             {
               from: job.data.from,
               to: job.data.to,
+              campaign: job.data.campaign,
+              html: job.data.html,
               subject: job.data.subject,
               body: job.data.body,
               userId: job.data.userId,

@@ -22,6 +22,8 @@ const dlqEmailSchema = new mongoose.Schema({
   userId: { type: String, required: false },
   body: { type: String, required: false },
   messageId: { type: String },
+  campaign: { type: String, required: true },
+  html: { type: String, required: false },
   status: { type: String, required: false, default: "failed" },
   errorMessage: { type: String, required: false },
   workerHistory: { type: [workerHistoryEntrySchema], default: [] },
