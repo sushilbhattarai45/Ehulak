@@ -8,6 +8,7 @@ import ApiKeyModel from "../models/apiKeyModel.js";
 import redisConfig from "../config/redisConfig.js";
 export const emailMiddleware = async (req, res, next) => {
   try {
+    console.log("Received request in emailMiddleware:", req.body);
     const apiKey = req.headers["x-api-key"];
     console.log("Received API key in emailMiddleware:", apiKey);
     if (!apiKey) {
@@ -18,8 +19,42 @@ export const emailMiddleware = async (req, res, next) => {
     const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
     console.log("Hashed API key in emailMiddleware:", keyHash);
    
-    const cachedKey = await redisConfig.get(`apiKey:${keyHash}`);
 
+//deleting
+    const cachedKey = await redisConfig.get(`apiKey:${keyHash}`);
+    const hourlyKey = `emailCount:${keyHash}`;
+    const minuteKey = `emailCountPerMinute:${keyHash}`;
+    
+    // Increment counters
+    const hourlyCount = await redisConfig.incr(hourlyKey);
+    const minuteCount = await redisConfig.incr(minuteKey);
+    
+    // Set expiry only when key is first created
+    if (hourlyCount === 1) {
+      await redisConfig.expire(hourlyKey, 3600);
+    }
+    
+    if (minuteCount === 1) {
+      await redisConfig.expire(minuteKey, 60);
+    }
+    
+    console.log("Hourly count:", hourlyCount);
+    console.log("Minute count:", minuteCount);
+    
+    // Rate limits
+    if (hourlyCount > 60) {
+      return res.status(401).json({
+        success: false,
+        message: "You have reached the maximum number of emails per hour.",
+      });
+    }
+    
+    if (minuteCount > 5) {
+      return res.status(401).json({
+        success: false,
+        message: "You have reached the maximum number of emails per minute.",
+      });
+    }
     if (cachedKey) {
       const cachedData = JSON.parse(cachedKey);
       if (!cachedData.isActive) {
