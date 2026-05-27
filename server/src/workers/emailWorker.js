@@ -10,38 +10,41 @@ import {
 
 import dotenv from "dotenv";
 dotenv.config();
+import sgMail from '@sendgrid/mail';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  pool: true,
-  maxConnections: 4,
-  maxMessages: 100,
-  rateDelta: 1000,
-  rateLimit: 4,
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   host: "smtp.hostinger.com",
+//   port: 587,
+//   secure: false, // IMPORTANT
+//   auth: {
+//     user: 'support@ehulak.tech',
+//     pass: 'Pass@H#2004',
+//   },
+//   requireTLS: true,
+//   pool: true,
+//   maxConnections: 4,
+//   maxMessages: 100,
+//   rateDelta: 1000,
+//   rateLimit: 4,
+//   tls: {
+//     rejectUnauthorized: false,
+//   },
+// });
 
-(async () => {
+// (async () => {
 
-  console.log("SMTP_HOST:", process.env.SMTP_HOST);
-  console.log("SMTP_PORT:", process.env.SMTP_PORT);
-  console.log("SMTP_USER:", process.env.SMTP_USER);
-  console.log("SMTP_PASSWORD:", process.env.SMTP_PASSWORD);
-  try {
-    await transporter.verify();
-    console.log(" Email transporter is ready");
-  } catch (err) {
-    console.error(" Transporter verification failed:", err);
-  }
-})();
+//   console.log("SMTP_HOST:", process.env.SMTP_HOST);
+//   console.log("SMTP_PORT:", process.env.SMTP_PORT);
+//   console.log("SMTP_USER:", process.env.SMTP_USER);
+//   console.log("SMTP_PASSWORD:", process.env.SMTP_PASSWORD);
+//   try {
+//     await transporter.verify();
+//     console.log(" Email transporter is ready");
+//   } catch (err) {
+//     console.error(" Transporter verification failed:", err);
+//   }
+// })();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 let counter = 0;
@@ -92,6 +95,14 @@ const worker = new Worker(
 
 const getEmailFields = (emailData) => {
   const payload = emailData.emailData || emailData;
+
+  console.log("Payload:", payload);
+  console.log("Payload HTML:", payload.html);
+  console.log("Payload Body:", payload.body);
+  console.log("Payload Subject:", payload.subject);
+  console.log("Payload User ID:", payload.userId);
+  console.log("Payload Campaign:", payload.campaign);
+  console.log("Payload Message ID:", payload.messageId);
   return {
     to: payload.to,
     from: 'noreply@ehulak.tech',
@@ -120,7 +131,8 @@ const sendEmail = async (jobData, workerHistory) => {
 try{
 
   console.log("Mail options:", mailOptions);  
-  await transporter.sendMail(mailOptions);
+  // await transporter.sendMail(mailOptions);
+  await sgMail.send(mailOptions);
   console.log("Email sent successfully to:", JSON.stringify(fields));
 
   sentEmailQueue.add(

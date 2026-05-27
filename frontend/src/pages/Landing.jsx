@@ -139,12 +139,20 @@ export default function Landing() {
 
       <header className="relative z-10 flex items-center justify-between px-5 sm:px-8 h-14 border-b border-border/60">
         <Logo />
-        <Link
-          to="/auth"
-          className="h-9 px-4 rounded-md border border-border bg-card text-sm font-medium hover:bg-accent transition-base"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/docs"
+            className="h-9 px-4 inline-flex items-center rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-base"
+          >
+            Docs
+          </Link>
+          <Link
+            to="/auth"
+            className="h-9 px-4 inline-flex items-center rounded-md border border-border bg-card text-sm font-medium hover:bg-accent transition-base"
+          >
+            Sign in
+          </Link>
+        </div>
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col justify-center px-5 sm:px-8 py-6 sm:py-8">
@@ -185,6 +193,12 @@ export default function Landing() {
                 className="inline-flex h-10 w-full sm:w-auto items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-medium hover:bg-accent transition-base"
               >
                 Create account
+              </Link>
+              <Link
+                to="/docs#quick-start"
+                className="inline-flex h-10 w-full sm:w-auto items-center justify-center rounded-md px-5 text-sm font-medium text-muted-foreground hover:text-foreground transition-base"
+              >
+                Read the quick start →
               </Link>
             </div>
 

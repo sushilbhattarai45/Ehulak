@@ -40,6 +40,7 @@ export default function App() {
                 <Auth />
               </AuthRoute>
             } />
+            <Route path="/docs" element={<Docs />} />
             <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/emails/:id" element={<EmailDetails />} />
@@ -48,7 +49,6 @@ export default function App() {
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/api-keys" element={<ApiKeys />} />
               <Route path="/logs" element={<Logs />} />
-              <Route path="/docs" element={<Docs />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

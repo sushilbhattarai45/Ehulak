@@ -7,18 +7,12 @@
   "scripts": {
     "start": "nodemon index.js",
     "start:producer": "nodemon ./src/kafka/producer.js",
-
     "start:emailConsumer": "node ./src/kafka/consumer/emailConsumer.js",
     "start:emailWorker": "nodemon ./src/workers/emailWorker.js",
-
-
     "start:apiKeyConsumer": "node ./src/kafka/consumer/apiKeyConsumer.js",
     "start:apiKeyWorker": "nodemon ./src/workers/apiKeyWorker.js",
-
-
     "start:userConsumer": "node ./src/kafka/consumer/userActivityConsumer.js",
     "start:userWorker": "nodemon ./src/workers/userActivityWorker.js",
-
     "start:dlqWorker": "nodemon ./src/workers/dlqWorker.js",
     "start:sentEmailWorker": "nodemon ./src/workers/sentEmailWorker.js"
   },
@@ -33,6 +27,7 @@
   },
   "homepage": "https://github.com/sushilbhattarai45/email-system#readme",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "axios": "^1.14.0",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.72.1",

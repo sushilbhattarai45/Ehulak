@@ -17,7 +17,7 @@ app.use(express.json());
 connectDb();
 console.log("connecting to kafka and creating topics...");
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3002;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
