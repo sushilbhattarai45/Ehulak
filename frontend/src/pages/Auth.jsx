@@ -45,7 +45,7 @@ export default function Auth() {
     loading,
   } = useAuth();
 
-  const googleClientId = process.env.VITE_GOOGLE_CLIENT_ID;
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   async function handleSubmit(e) {
     e.preventDefault();
