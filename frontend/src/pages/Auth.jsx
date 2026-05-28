@@ -45,7 +45,7 @@ export default function Auth() {
     loading,
   } = useAuth();
 
-  const googleClientId = '111951776458-nqtala2ue737d21hkf9bspgvprjh7k7r.apps.googleusercontent.com';
+  const googleClientId = process.env.VITE_GOOGLE_CLIENT_ID;
 
   async function handleSubmit(e) {
     e.preventDefault();
