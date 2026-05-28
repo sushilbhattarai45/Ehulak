@@ -103,7 +103,7 @@ function DocsBody({ withPageHeader = false }) {
       {withPageHeader && (
         <PageHeader
           title="Documentation"
-          description="Learn how to send email through the platform and monitor delivery from your dashboard."
+          description="Learn how to send instant emails for free and track delivery from queue to inbox."
         />
       )}
 
@@ -181,7 +181,8 @@ function DocsBody({ withPageHeader = false }) {
             <Section id="quick-start" title="Quick Start">
               <p>
                 New to Ehulak? Get your first email out the door in three steps. You can read these
-                without signing in—come back after each step to continue.
+                without signing in—come back after each step to continue. The service is free to
+                start and optimized for instant delivery.
               </p>
 
               <div className="grid gap-3 sm:grid-cols-3 not-prose">
@@ -280,9 +281,9 @@ sendFirstEmail();`}</Code>
 
             <Section id="getting-started" title="Getting Started">
               <p>
-                Ehulak lets you send transactional and campaign email through a simple HTTP API.
-                After you send a message, you can follow its status from the dashboard—delivered,
-                failed, or held for review.
+                Ehulak is an instant, free-to-start email delivery service with a simple HTTP API.
+                Every message follows the same delivery path: accepted by the API, pushed to queue,
+                processed by workers, then delivered (or retried and moved to DLQ if needed).
               </p>
               <p>To integrate in three steps:</p>
               <ol className="list-decimal pl-5 space-y-2">
@@ -329,8 +330,8 @@ sendFirstEmail();`}</Code>
 
             <Section id="send-email" title="Send Email">
               <p>
-                Submit a send request with the recipient and sender addresses. The platform accepts
-                the message and processes delivery in the background.
+                Submit a send request with your email content. The platform accepts it immediately,
+                queues it, and workers deliver it in the background.
               </p>
 
               <div className="rounded-lg border border-border bg-card/50 p-4 space-y-3">
@@ -474,8 +475,9 @@ That's it. Open the dashboard to watch the email move through the pipeline and l
                 failures—sorted with the newest first.
               </p>
               <p>
-                Click any row to open full details for that message. Status badges show whether a
-                send succeeded or ultimately failed.
+                Click any row to open full details for that message. You will see how it moved
+                through the pipeline (queue → processing → delivered), or where it failed if
+                retries were exhausted.
               </p>
             </Section>
 
@@ -597,7 +599,8 @@ function PublicShell({ children }) {
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">Documentation</h1>
           <p className="mt-1.5 text-sm text-muted-foreground max-w-2xl">
-            Learn how Ehulak works and send your first email. Start with{" "}
+            Learn how Ehulak gives you instant, free email delivery and send your first email.
+            Start with{" "}
             <a href="#quick-start" className="text-primary hover:underline">
               Quick Start
             </a>{" "}

@@ -26,9 +26,9 @@ function Logo() {
 }
 
 const FEATURES = [
-  { icon: Zap, label: "Event-driven", desc: "Kafka-backed pipeline" },
-  { icon: Activity, label: "Live tracking", desc: "Every send, every stage" },
-  { icon: KeyRound, label: "API-first", desc: "Keys & webhooks ready" },
+  { icon: Zap, label: "Instant delivery", desc: "Queue + workers send in seconds" },
+  { icon: Activity, label: "Live tracking", desc: "See every stage in real time" },
+  { icon: KeyRound, label: "Free to start", desc: "5/min and 60/hour at no cost" },
 ];
 
 const PIPELINE_STEPS = [
@@ -167,18 +167,18 @@ export default function Landing() {
             </div>
 
             <h1 className="text-4xl sm:text-[2.75rem] font-semibold tracking-tight leading-[1.1]">
-              Your emails,{" "}
-              <span className="text-primary">delivered</span>
+              Instant,{" "}
+              <span className="text-primary">free</span>
               <br className="hidden sm:block" />
               <span className="text-muted-foreground font-normal text-3xl sm:text-[2rem]">
                 {" "}
-                through one pipeline.
+                email delivery service.
               </span>
             </h1>
 
             <p className="mt-4 text-muted-foreground text-sm sm:text-base max-w-md mx-auto lg:mx-0 leading-relaxed">
-              Ehulak routes every message from queue to worker to inbox — with retries, DLQ, and
-              full visibility built in.
+              Send emails instantly with a free API-first platform. Ehulak routes each message
+              from queue → worker → inbox with retries, DLQ fallback, and full visibility built in.
             </p>
 
             <div className="mt-6 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
