@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Mail, ArrowRight, UserPlus, KeyRound, Send, Server, Info } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
 import DeveloperCredit from "../components/DeveloperCredit.jsx";
+import LogoMark from "../components/LogoMark.jsx";
 import Sidebar from "../layout/Sidebar.jsx";
 import Topbar from "../layout/Topbar.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -570,9 +571,7 @@ function PublicShell({ children }) {
       />
       <header className="relative z-10 flex items-center justify-between px-5 sm:px-8 h-14 border-b border-border/60 bg-background/80 backdrop-blur">
         <Link to="/" className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
-            <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_12px_oklch(0.72_0.14_155)]" />
-          </div>
+          <LogoMark />
           <span className="font-semibold tracking-tight text-lg">Ehulak</span>
         </Link>
         <div className="flex items-center gap-2">

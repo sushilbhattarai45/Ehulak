@@ -129,10 +129,10 @@ export default function Dashboard() {
               </svg>
               {refreshing ? "Refreshing..." : "Refresh"}
             </button>
-            <button className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border text-sm hover:bg-accent transition-base">
+            {/* <button className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border text-sm hover:bg-accent transition-base">
               <Download className="h-4 w-4" />
               Export
-            </button>
+            </button> */}
           </div>
         }
       />

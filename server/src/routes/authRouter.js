@@ -1,8 +1,9 @@
 import express from "express";
 const authRouter = express.Router();
-import { createOTP, login,refreshToken, registerUser,updateUser, validateOTP} from "../controllers/authController.js";
+import { createOTP, googleAuth, login, refreshToken, registerUser, updateUser, validateOTP } from "../controllers/authController.js";
 
 authRouter.post("/login", login);
+authRouter.post("/google", googleAuth);
 authRouter.post("/refreshToken", refreshToken);
 
 authRouter.post("/register", registerUser);

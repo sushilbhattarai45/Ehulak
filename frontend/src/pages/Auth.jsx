@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { classNames } from "../lib/format.js";
 import { Mail, Zap, Activity, KeyRound, ArrowLeft } from "lucide-react";
 import Modal from "../components/Modal.jsx";
 import DeveloperCredit from "../components/DeveloperCredit.jsx";
+import LogoMark from "../components/LogoMark.jsx";
 import {
   InputOTP,
   InputOTPGroup,
@@ -35,12 +37,15 @@ export default function Auth() {
   const navigate = useNavigate();
   const {
     login,
+    loginWithGoogle,
     signup,
     createOtp,
     validateOtp,
     completeFirstLogin,
     loading,
   } = useAuth();
+
+  const googleClientId = '111951776458-nqtala2ue737d21hkf9bspgvprjh7k7r.apps.googleusercontent.com';
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -54,6 +59,7 @@ export default function Auth() {
       if (!result?.success) return;
 
       if (result.needsProfile) {
+        
         setPendingLogin({ user: result.user, accessToken: result.accessToken });
         setShowProfileModal(true);
         return;
@@ -105,6 +111,21 @@ export default function Auth() {
     setOtpLoading(false);
   }
 
+  async function handleGoogleSuccess(credentialResponse) {
+    const credential = credentialResponse?.credential;
+    if (!credential) return;
+
+    const result = await loginWithGoogle(credential);
+    if (!result?.success) return;
+
+    if (result.needsProfile) {
+      setPendingLogin({ user: result.user, accessToken: result.accessToken });
+      setShowProfileModal(true);
+      return;
+    }
+    navigate("/dashboard");
+  }
+
   async function handleProfileSubmit(e) {
     e.preventDefault();
     if (!name.trim() || !organization.trim()) {
@@ -140,9 +161,7 @@ export default function Auth() {
 
       <header className="relative z-10 flex items-center justify-between px-5 sm:px-8 h-14 border-b border-border/60">
         <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-base">
-          <div className="h-7 w-7 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
-            <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_12px_oklch(0.72_0.14_155)]" />
-          </div>
+          <LogoMark />
           <span className="font-semibold tracking-tight text-lg">Ehulak</span>
         </Link>
         <Link
@@ -229,7 +248,7 @@ export default function Auth() {
                     className={classNames(
                       "h-8 rounded text-xs font-medium transition-base",
                       mode === t.v
-                        ? "bg-card text-foreground shadow-sm"
+                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >
@@ -238,13 +257,35 @@ export default function Auth() {
                 ))}
               </div>
 
-              <button
-                type="button"
-                className="w-full h-9 rounded-md border border-border bg-background hover:bg-accent text-sm font-medium flex items-center justify-center gap-2 transition-base"
-              >
-                <GoogleIcon />
-                Continue with Google
-              </button>
+              {googleClientId ? (
+                <GoogleOAuthProvider clientId={googleClientId}>
+                  <div className="w-full flex justify-center [&>div]:w-full [&_iframe]:!w-full">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={() =>
+                        import("sonner").then(({ toast }) =>
+                          toast.error("Google sign-in was cancelled or failed"),
+                        )
+                      }
+                      theme="outline"
+                      size="large"
+                      width="100%"
+                      text="continue_with"
+                      shape="rectangular"
+                    />
+                  </div>
+                </GoogleOAuthProvider>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  title="Add VITE_GOOGLE_CLIENT_ID to your .env file"
+                  className="w-full h-9 rounded-md border border-border bg-background text-sm font-medium flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </button>
+              )}
 
               <div className="flex items-center gap-3 my-5">
                 <div className="flex-1 h-px bg-border" />

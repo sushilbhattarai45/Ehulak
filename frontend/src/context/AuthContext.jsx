@@ -66,6 +66,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (credential) => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post("/auth/google", { credential });
+      const { accessToken: token, user: userData } = res.data;
+      setAccessToken(token);
+      localStorage.setItem("accessToken", token);
+
+      if (userData?.firstTimeLogin) {
+        return { success: true, needsProfile: true, user: userData, accessToken: token };
+      }
+
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      if (userData?.userId) await fetchApiKey(userData.userId);
+      toast.success("Signed in with Google");
+      return { success: true, needsProfile: false };
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Google sign-in failed");
+      return { success: false };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const login = async (email, password) => {
     setLoading(true);
     try {
@@ -244,6 +269,7 @@ const logout = () => {
         setUser,
         loading,
         login,
+        loginWithGoogle,
         signup,
         createOtp,
         validateOtp,

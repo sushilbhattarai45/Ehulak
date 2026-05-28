@@ -1,11 +1,47 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 import User from "../models/userModel.js";
 import ApiKeyModel from "../models/apiKeyModel.js";
 import redisConfig from "../config/redisConfig.js";
 
 import bcrypt from "bcrypt";
 import { producer } from "../kafka/producer.js";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+function issueAuthTokens(user, res) {
+  const accessToken = jwt.sign(
+    { userId: user.userId, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" },
+  );
+
+  const refreshToken = jwt.sign(
+    { userId: user.userId },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: "7d" },
+  );
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+
+  return {
+    accessToken,
+    user: {
+      userId: user.userId,
+      email: user.email,
+      name: user.name,
+      image: user.image,
+      accountType: user.accountType,
+      firstTimeLogin: user.firstTimeLogin ?? false,
+      organization: user.organization || null,
+    },
+  };
+}
 // export const login = (req, res) => {
 //   const { email, password } = req.body;
 
@@ -116,7 +152,7 @@ export const login = async (req, res) => {
     }
 
     // 4. STRICT RULE: block if user signed up with Google
-    if (user.authProvider === "google") {
+    if (user.accountType === "google") {
       return res.status(400).json({
         success: false,
         message: "This account uses Google login. Please sign in with Google.",
@@ -149,46 +185,20 @@ export const login = async (req, res) => {
     });
   }
 
-    // 7. Generate tokens
-    const accessToken = jwt.sign(
-      { userId: user.userId, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" },
-    );
-
-    const refreshToken = jwt.sign(
-      { userId: user.userId },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "7d" },
-    );
-
-    // 8. Set refresh token cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-    });
-
     let firstTimeLogin = user.firstTimeLogin;
     if (firstTimeLogin === undefined) {
       const dbUser = await User.findOne({ email });
       firstTimeLogin = dbUser?.firstTimeLogin ?? true;
+      user.firstTimeLogin = firstTimeLogin;
     }
 
-    // 9. Response
+    const { accessToken, user: userPayload } = issueAuthTokens(user, res);
+
     return res.json({
       success: true,
       message: "Login successful",
       accessToken,
-      user: {
-        userId: user.userId,
-        email: user.email,
-        name: user.name,
-        image: user.image,
-        accountType: user.accountType,
-        firstTimeLogin,
-        organization: user.organization || null,
-      },
+      user: userPayload,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -278,6 +288,105 @@ export const registerUser = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+};
+
+export const googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: "Google credential is required",
+      });
+    }
+
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      return res.status(500).json({
+        success: false,
+        message: "Google sign-in is not configured on the server",
+      });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload?.email;
+    const name = payload?.name;
+    const image = payload?.picture;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Google account email is required",
+      });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      const cachedUser = await redisConfig.get(`user:${email}`);
+      if (cachedUser) {
+        user = JSON.parse(cachedUser);
+      }
+    }
+
+    if (user && user.accountType === "local") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This email is registered with a password. Please sign in with email and password.",
+      });
+    }
+
+    if (!user) {
+      const userId = crypto.randomBytes(16).toString("hex");
+      const data = {
+        userId,
+        email,
+        name,
+        image,
+        accountType: "google",
+        status: "active",
+        firstTimeLogin: true,
+      };
+
+      await redisConfig.set(`user:${email}`, JSON.stringify(data), "EX", 3600);
+
+      await producer({
+        type: "userActivity",
+        action: "registerUser",
+        data,
+      });
+
+      user = data;
+    } else if (user.status && user.status !== "active") {
+      return res.status(401).json({
+        success: false,
+        message: "User is not active",
+      });
+    }
+
+    await redisConfig.set(`user:${email}`, JSON.stringify(user), "EX", 3600);
+
+    const { accessToken, user: userPayload } = issueAuthTokens(user, res);
+
+    return res.json({
+      success: true,
+      message: "Google sign-in successful",
+      accessToken,
+      user: userPayload,
+    });
+  } catch (error) {
+    console.error("Google auth error:", error);
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired Google sign-in",
     });
   }
 };

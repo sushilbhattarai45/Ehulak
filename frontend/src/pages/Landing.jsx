@@ -13,14 +13,13 @@ import {
 } from "lucide-react";
 import StatusBadge from "../components/StatusBadge.jsx";
 import DeveloperCredit from "../components/DeveloperCredit.jsx";
+import LogoMark from "../components/LogoMark.jsx";
 
 function Logo() {
   return (
     <div className="flex items-center gap-2">
-      <div className="h-7 w-7 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
-        <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_12px_oklch(0.72_0.14_155)]" />
-      </div>
-      <span className="font-semibold tracking-tight text-lg">Ehulak</span>
+      <LogoMark />
+      <span className="font-semibold tracking-tight text-2xl">Ehulak</span>
     </div>
   );
 }
