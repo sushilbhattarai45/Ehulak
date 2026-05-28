@@ -9,6 +9,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { classNames } from "../lib/format.js";
+import DeveloperCredit from "../components/DeveloperCredit.jsx";
 
 const NAV = [
   { to: "/dashboard", label: "Emails", icon: LayoutDashboard, end: true },
@@ -53,7 +54,7 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      <div className="border-t border-sidebar-border p-4">
+      <div className="border-t border-sidebar-border p-4 space-y-3">
         <div className="rounded-md bg-sidebar-accent/60 p-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-2 text-foreground">
             <span className="dot bg-primary" />
@@ -61,6 +62,7 @@ export default function Sidebar() {
           </div>
           <div className="mt-1">99.98% delivery uptime · 30d</div>
         </div>
+        <DeveloperCredit align="left" />
       </div>
     </aside>
   );

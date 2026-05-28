@@ -8,8 +8,9 @@ import {
   getEmailEvents,
   getEmailEventById,
 } from "../controllers/emailController.js";
+import { rateLimitMiddleware } from "../middlewares/rateLimitMiddleware.js";
 
-emailRouter.post("/processEmail", processEmail);
+emailRouter.post("/processEmail", rateLimitMiddleware, processEmail);
 
 emailRouter.get("/getDLQEmails", getDLQEmails);
 

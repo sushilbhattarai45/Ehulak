@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { classNames } from "../lib/format.js";
 import { Mail, Zap, Activity, KeyRound, ArrowLeft } from "lucide-react";
 import Modal from "../components/Modal.jsx";
+import DeveloperCredit from "../components/DeveloperCredit.jsx";
 import {
   InputOTP,
   InputOTPGroup,
@@ -291,10 +292,11 @@ export default function Auth() {
         </div>
       </main>
 
-      <footer className="relative z-10 px-5 sm:px-8 py-3 border-t border-border/60">
-        <p className="text-center text-[11px] text-muted-foreground max-w-4xl mx-auto">
+      <footer className="relative z-10 px-5 sm:px-8 py-3 border-t border-border/60 space-y-1.5 max-w-4xl mx-auto">
+        <p className="text-center text-[11px] text-muted-foreground">
           Queue → worker → delivery · Built for teams who care about deliverability
         </p>
+        <DeveloperCredit />
       </footer>
 
       <Modal

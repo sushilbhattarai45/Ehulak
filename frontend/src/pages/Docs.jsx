@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, ArrowRight, UserPlus, KeyRound, Send, Server, Info } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
+import DeveloperCredit from "../components/DeveloperCredit.jsx";
 import Sidebar from "../layout/Sidebar.jsx";
 import Topbar from "../layout/Topbar.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -605,10 +606,11 @@ function PublicShell({ children }) {
         </div>
         {children}
       </main>
-      <footer className="relative z-10 px-5 sm:px-8 py-3 border-t border-border/60">
-        <p className="text-center text-[11px] text-muted-foreground max-w-5xl mx-auto">
+      <footer className="relative z-10 px-5 sm:px-8 py-3 border-t border-border/60 space-y-1.5 max-w-5xl mx-auto">
+        <p className="text-center text-[11px] text-muted-foreground">
           Queue → worker → delivery · Built for teams who care about deliverability
         </p>
+        <DeveloperCredit />
       </footer>
     </div>
   );
