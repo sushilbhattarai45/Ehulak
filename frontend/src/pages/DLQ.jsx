@@ -45,28 +45,30 @@ export default function DLQ() {
           </div>
         </div>
       ),
-    },
-    {
-      key: "action",
-      label: "",
-      render: (r) => {
-        const rowId = r.id || r._id;
-        return (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setRetried((m) => ({ ...m, [rowId]: true }));
-            }}
-            disabled={retried[rowId]}
-            className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md border border-border text-[11px] hover:bg-accent transition-base disabled:opacity-50"
-          >
-            <RefreshCw className="h-3 w-3" />
-            {retried[rowId] ? "Requeued" : "Retry"}
-          </button>
-        );
-      },
-    },
+    }
+    // {
+    //   key: "action",
+    //   label: "",
+    //   render: (r) => {
+    //     const rowId = r.id || r._id;
+    //     return (
+    //       <button
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //           setRetried((m) => ({ ...m, [rowId]: true }));
+    //         }}
+    //         disabled={retried[rowId]}
+    //         className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md border border-border text-[11px] hover:bg-accent transition-base disabled:opacity-50"
+    //       >
+    //         <RefreshCw className="h-3 w-3" />
+    //         {retried[rowId] ? "Requeued" : "Retry"}
+    //       </button>
+    //     );
+    //   },
+    // },
   ];
+
+
 
   return (
     <div>
