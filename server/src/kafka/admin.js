@@ -11,13 +11,14 @@ async function init() {
 
     const created = await admin.createTopics({
       topics: [
-        { topic: "email", numPartitions: 5 },
-        { topic: "email-retry", numPartitions: 5 },
-        { topic: "email-dead-letter", numPartitions: 5 },
-        { topic: "apiKey", numPartitions: 5 },
+        { topic: "email", numPartitions: 5 ,replicationFactor: 1},
+        { topic: "email-retry", numPartitions: 5 ,replicationFactor: 1},
+        { topic: "email-dead-letter", numPartitions: 5 ,replicationFactor: 1},
+        { topic: "apiKey", numPartitions: 5 ,replicationFactor: 1},
         {
           topic: "userActivity",
           numPartitions: 5,
+          replicationFactor: 1,
         },
       ],
     });
