@@ -3,10 +3,9 @@ import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { classNames } from "../lib/format.js";
-import { Mail, Zap, Activity, KeyRound, ArrowLeft } from "lucide-react";
+import { Mail, Zap, Activity, KeyRound } from "lucide-react";
 import Modal from "../components/Modal.jsx";
-import DeveloperCredit from "../components/DeveloperCredit.jsx";
-import LogoMark from "../components/LogoMark.jsx";
+import PublicPageShell from "../components/PublicPageShell.jsx";
 import {
   InputOTP,
   InputOTPGroup,
@@ -149,31 +148,12 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,oklch(0.72_0.14_155/0.12),transparent)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 bg-[linear-gradient(to_right,oklch(0.26_0.012_250/0.4)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.26_0.012_250/0.4)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_75%)]"
-      />
-
-      <header className="relative z-10 flex items-center justify-between px-5 sm:px-8 h-14 border-b border-border/60">
-        <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-base">
-          <LogoMark />
-          <span className="font-semibold tracking-tight text-lg">Ehulak</span>
-        </Link>
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-base"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Home
-        </Link>
-      </header>
-
-      <main className="relative z-10 flex-1 flex flex-col justify-center px-5 sm:px-8 py-6 sm:py-8">
+    <>
+      <PublicPageShell
+        headerVariant="auth"
+        footerClassName="max-w-4xl"
+        mainClassName="flex flex-col justify-center px-5 sm:px-8 py-6 sm:py-8"
+      >
         <div className="max-w-4xl mx-auto w-full grid lg:grid-cols-[1fr_auto] gap-10 lg:gap-16 items-center">
           <div className="hidden lg:block text-left">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs text-muted-foreground mb-5">
@@ -331,14 +311,7 @@ export default function Auth() {
             </div>
           </div>
         </div>
-      </main>
-
-      <footer className="relative z-10 px-5 sm:px-8 py-3 border-t border-border/60 space-y-1.5 max-w-4xl mx-auto">
-        <p className="text-center text-[11px] text-muted-foreground">
-          Queue → worker → delivery · Built for teams who care about deliverability
-        </p>
-        <DeveloperCredit />
-      </footer>
+      </PublicPageShell>
 
       <Modal
         open={showOtpModal}
@@ -414,7 +387,7 @@ export default function Auth() {
           </button>
         </form>
       </Modal>
-    </div>
+    </>
   );
 }
 

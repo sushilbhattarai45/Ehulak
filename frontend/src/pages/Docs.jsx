@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, ArrowRight, UserPlus, KeyRound, Send, Server, Info } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
-import DeveloperCredit from "../components/DeveloperCredit.jsx";
-import LogoMark from "../components/LogoMark.jsx";
+import PublicPageShell from "../components/PublicPageShell.jsx";
 import Sidebar from "../layout/Sidebar.jsx";
 import Topbar from "../layout/Topbar.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -564,57 +563,29 @@ That's it. Open the dashboard to watch the email move through the pipeline and l
 
 function PublicShell({ children }) {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,oklch(0.72_0.14_155/0.12),transparent)]"
-      />
-      <header className="relative z-10 flex items-center justify-between px-5 sm:px-8 h-14 border-b border-border/60 bg-background/80 backdrop-blur">
-        <Link to="/" className="flex items-center gap-2">
-          <LogoMark />
-          <span className="font-semibold tracking-tight text-lg">Ehulak</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <Link
-            to="/auth"
-            className="h-9 px-4 inline-flex items-center rounded-md border border-border bg-card text-sm font-medium hover:bg-accent transition-base"
-          >
-            Sign in
-          </Link>
-          <Link
-            to="/auth?mode=signup"
-            className="h-9 px-4 inline-flex items-center gap-2 rounded-md bg-primary text-sm font-medium text-primary-foreground hover:opacity-90 transition-base"
-          >
-            Create account
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+    <PublicPageShell
+      headerVariant="docs"
+      headerBlurred
+      overflowHidden={false}
+      mainClassName="mx-auto w-full max-w-[1400px] px-5 sm:px-8 py-8"
+    >
+      <div className="mb-6">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs text-muted-foreground mb-4">
+          <Mail className="h-3.5 w-3.5 text-primary" />
+          <span>Documentation · open access</span>
         </div>
-      </header>
-      <main className="relative z-10 flex-1 mx-auto w-full max-w-[1400px] px-5 sm:px-8 py-8">
-        <div className="mb-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs text-muted-foreground mb-4">
-            <Mail className="h-3.5 w-3.5 text-primary" />
-            <span>Documentation · open access</span>
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Documentation</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground max-w-2xl">
-            Learn how Ehulak gives you instant, free email delivery and send your first email.
-            Start with{" "}
-            <a href="#quick-start" className="text-primary hover:underline">
-              Quick Start
-            </a>{" "}
-            for the fastest path.
-          </p>
-        </div>
-        {children}
-      </main>
-      <footer className="relative z-10 px-5 sm:px-8 py-3 border-t border-border/60 space-y-1.5 max-w-5xl mx-auto">
-        <p className="text-center text-[11px] text-muted-foreground">
-          Queue → worker → delivery · Built for teams who care about deliverability
+        <h1 className="text-2xl font-semibold tracking-tight">Documentation</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground max-w-2xl">
+          Learn how Ehulak gives you instant, free email delivery and send your first email.
+          Start with{" "}
+          <a href="#quick-start" className="text-primary hover:underline">
+            Quick Start
+          </a>{" "}
+          for the fastest path.
         </p>
-        <DeveloperCredit />
-      </footer>
-    </div>
+      </div>
+      {children}
+    </PublicPageShell>
   );
 }
 

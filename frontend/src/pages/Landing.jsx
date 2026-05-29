@@ -12,17 +12,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import StatusBadge from "../components/StatusBadge.jsx";
-import DeveloperCredit from "../components/DeveloperCredit.jsx";
-import LogoMark from "../components/LogoMark.jsx";
-
-function Logo() {
-  return (
-    <div className="flex items-center gap-2">
-      <LogoMark />
-      <span className="font-semibold tracking-tight text-2xl">Ehulak</span>
-    </div>
-  );
-}
+import PublicPageShell from "../components/PublicPageShell.jsx";
 
 const FEATURES = [
   { icon: Zap, label: "Instant delivery", desc: "Queue + workers send in seconds" },
@@ -127,41 +117,17 @@ export default function Landing() {
   if (user) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,oklch(0.72_0.14_155/0.12),transparent)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 bg-[linear-gradient(to_right,oklch(0.26_0.012_250/0.4)_1px,transparent_1px),linear-gradient(to_bottom,oklch(0.26_0.012_250/0.4)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_75%)]"
-      />
-
-      <header className="relative z-10 flex items-center justify-between px-5 sm:px-8 h-14 border-b border-border/60">
-        <Logo />
-        <div className="flex items-center gap-2">
-          <Link
-            to="/docs"
-            className="h-9 px-4 inline-flex items-center rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-base"
-          >
-            Docs
-          </Link>
-          <Link
-            to="/auth"
-            className="h-9 px-4 inline-flex items-center rounded-md border border-border bg-card text-sm font-medium hover:bg-accent transition-base"
-          >
-            Sign in
-          </Link>
-        </div>
-      </header>
-
-      <main className="relative z-10 flex-1 flex flex-col justify-center px-5 sm:px-8 py-6 sm:py-8">
+    <PublicPageShell
+      headerVariant="landing"
+      logoLarge
+      mainClassName="flex flex-col justify-center px-5 sm:px-8 py-6 sm:py-8"
+    >
         <div className="max-w-5xl mx-auto w-full grid lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-12 items-center">
           <div className="text-center lg:text-left">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs text-muted-foreground mb-5">
               <Mail className="h-3.5 w-3.5 text-primary" />
               <span>
-                <span className="text-primary font-medium">e</span>-hulak · electronic post office
+                <span className="text-primary font-medium">E</span>-hulak · electronic post office
               </span>
             </div>
 
@@ -249,14 +215,6 @@ export default function Landing() {
             ))}
           </div>
         </div>
-      </main>
-
-      <footer className="relative z-10 px-5 sm:px-8 py-3 border-t border-border/60 space-y-1.5 max-w-5xl mx-auto">
-        <p className="text-center text-[11px] text-muted-foreground">
-          Queue → worker → delivery · Built for teams who care about deliverability
-        </p>
-        <DeveloperCredit />
-      </footer>
-    </div>
+    </PublicPageShell>
   );
 }

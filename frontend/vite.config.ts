@@ -7,8 +7,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), tsconfigPaths()],
   server: {
     port: 5173,
-  },
-  build: {
-    outDir: "/var/www/ehulak"
-  },
+  }
+  // ,
+  // build: {
+  //   outDir: "/var/www/ehulak"
+  // },
 });
