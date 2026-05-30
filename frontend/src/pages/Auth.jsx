@@ -6,6 +6,7 @@ import { classNames } from "../lib/format.js";
 import { Mail, Zap, Activity, KeyRound } from "lucide-react";
 import Modal from "../components/Modal.jsx";
 import PublicPageShell from "../components/PublicPageShell.jsx";
+import LogoMark from "../components/LogoMark.jsx";
 import {
   InputOTP,
   InputOTPGroup,
@@ -198,9 +199,7 @@ export default function Auth() {
 
           <div className="w-full max-w-sm mx-auto lg:mx-0 lg:w-[380px]">
             <div className="lg:hidden flex items-center gap-2 justify-center mb-6">
-              <div className="h-7 w-7 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
-                <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-              </div>
+              <LogoMark className="h-7 w-7" />
               <span className="font-semibold tracking-tight text-lg">Ehulak</span>
             </div>
 

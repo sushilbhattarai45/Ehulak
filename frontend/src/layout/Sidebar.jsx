@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { classNames } from "../lib/format.js";
 import DeveloperCredit from "../components/DeveloperCredit.jsx";
+import LogoMark from "../components/LogoMark.jsx";
 
 const NAV = [
   { to: "/dashboard", label: "Emails", icon: LayoutDashboard, end: true },
@@ -25,9 +26,7 @@ export default function Sidebar() {
     <aside className="fixed inset-y-0 left-0 w-60 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col z-30">
       <div className="h-14 flex items-center px-5 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
-            <div className="h-2 w-2 rounded-full bg-primary" />
-          </div>
+          <LogoMark className="h-6 w-6" />
           <span className="font-semibold tracking-tight text-[15px]">Ehulak</span>
         </div>
       </div>
