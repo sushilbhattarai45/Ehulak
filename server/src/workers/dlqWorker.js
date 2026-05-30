@@ -47,6 +47,8 @@ dotenv.config();
               body: emailPayload.body,
               userId: emailPayload.userId,
               messageId: emailPayload.messageId,
+              campaign: emailPayload.campaign,
+              html: emailPayload.html,
               errorMessage: job.data.error,
               workerHistory,
             },

@@ -105,7 +105,7 @@ const getEmailFields = (emailData) => {
   console.log("Payload Message ID:", payload.messageId);
   return {
     to: payload.to,
-    from: 'info@ragatnepal.com',
+    from: 'noreply@ehulak.tech',
     subject: payload.subject,
     text: payload.text || payload.body,
     body: payload.body || payload.text,
