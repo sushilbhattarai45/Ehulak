@@ -36,7 +36,7 @@ export async function processEmail(req, res) {
     });
     res
       .status(200)
-      .json({ message: `Email details for ID: fetched successfully!` });
+      .json({ message: `Email will be sent to ${to} shortly!` });
   } catch (error) {
     // console.error("Error fetching email details:", error);
     res.status(500).json({ error: error.message || "Internal Server Error" });

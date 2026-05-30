@@ -11,6 +11,7 @@ authRouter.post("/register", registerUser);
 authRouter.post("/updateUser", updateUser);
 
 
+
 authRouter.post("/generateOtp", createOTP);
 authRouter.post("/validateOtp", validateOTP)
 
