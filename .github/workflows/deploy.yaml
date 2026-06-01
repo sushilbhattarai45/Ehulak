@@ -16,7 +16,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{secrets.HOST_DO}}
-          username:root
+          username: root
           key: ${{secrets.SSH_KEY_DO}}
           script: |
             cd root@email-server:~/Ehulak
