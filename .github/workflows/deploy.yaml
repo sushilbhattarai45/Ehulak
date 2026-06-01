@@ -19,7 +19,7 @@ jobs:
           username: root
           key: ${{secrets.SSH_KEY_DO}}
           script: |
-            cd root@email-server:~/Ehulak
+            cd Ehulak
             git pull
             cd frontend
             npm install
