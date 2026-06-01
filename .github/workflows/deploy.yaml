@@ -1,0 +1,36 @@
+name :"Deploying to Production"
+
+on :
+  push:
+    branches:
+      - main
+  
+
+jobs:
+  deploy:
+    runs-on: ubunut-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: deploying the whole app
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{secrets.HOST_DO}}
+          username:root
+          key: ${{secrets.SSH_KEY_DO}}
+          script: |
+            cd root@email-server:~/Ehulak
+            git pull origin main
+            cd frontend
+            npm install
+            npm run build
+            cd ../server
+            npm install
+            pm2 restart all
+
+
+
+    
+
+     
