@@ -31,5 +31,16 @@ jobs:
             git pull
             npm install
             pm2 restart all
-
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Test
+        run: |
+          echo "Hello, world!"
+        
+      - name: Checking health
+        run: |
+          curl -f http://127.0.0.1:3000 || exit 1
       
