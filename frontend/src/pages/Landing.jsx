@@ -127,7 +127,7 @@ export default function Landing() {
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs text-muted-foreground mb-5">
               <Mail className="h-3.5 w-3.5 text-primary" />
               <span>
-                <span className="text-primary font-medium">E</span>-hulak electronic post office
+                <span className="text-primary font-medium">E</span>-hulak . Electronic Post Office
               </span>
             </div>
 
