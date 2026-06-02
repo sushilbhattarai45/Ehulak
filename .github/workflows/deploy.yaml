@@ -42,6 +42,11 @@ jobs:
           echo "Hello, world!"
         
       - name: Checking health
-        run: |
-          curl -f http://127.0.0.1:3000 || exit 1
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{secrets.HOST_DO}}
+          username: root
+          key: ${{secrets.SSH_KEY_DO}}
+          run: |
+            curl -f http://127.0.0.1:3000 || exit 1
       
