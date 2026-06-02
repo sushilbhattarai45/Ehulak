@@ -20,14 +20,6 @@ export const createAPIKey = async (req, res) => {
     console.log("Generated API key:", apiKeyValue);
     console.log("Hashed API key to be saved:", keyHash);
 
-    await redisConfig.set(
-      `apiKey:${keyHash}`,
-      JSON.stringify({
-        userId,
-        isActive: true,
-      }),
-    );
-
     // User -> Key mapping
     await redisConfig.set(
       `userApiKey:${userId}`,
@@ -36,6 +28,17 @@ export const createAPIKey = async (req, res) => {
         apiKey: apiKeyValue,
       }),
     );
+
+    await redisConfig.set(
+      `apiKey:${keyHash}`,
+      JSON.stringify({
+        keyHash,
+       userId,
+       apiKey: apiKeyValue,
+       isActive: true,
+      }),
+    );
+
     await producer({
       type: "apiKey",
       action: "createApiKey",
@@ -85,7 +88,8 @@ export const getAPiKeyForUser = async (req, res) => {
         source: "database",
       });
     }
-    res.json({ success: true, apiKey: apiKeyData.keyHash, source: "database" });
+
+    res.json({ success: true, apiKey: apiKeyData.apiKeyValue, source: "database" });
   } catch (error) {
     console.error("Error fetching API key:", error);
     res.status(500).json({ success: false, message: "Internal server error" });

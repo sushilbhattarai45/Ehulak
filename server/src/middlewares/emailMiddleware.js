@@ -14,7 +14,6 @@ export const emailMiddleware = async (req, res, next) => {
 
     const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
     const cachedKey = await redisConfig.get(`apiKey:${keyHash}`);
-
     if (cachedKey) {
       const cachedData = JSON.parse(cachedKey);
       if (!cachedData.isActive) {

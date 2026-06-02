@@ -19,6 +19,7 @@ async function apiKeyConsumer() {
         {
           userId: jobData.data.userId,
           keyHash: jobData.data.keyHash,
+          apiKeyValue: jobData.data.apiKeyValue,
         },
         {
           attempts: 2,

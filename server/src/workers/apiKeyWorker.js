@@ -42,13 +42,14 @@ const worker = new Worker(
     console.log("Received API key creation job for user ID:", data)
     const userId = data.userId; 
     const keyHash = data.keyHash;
-
+    const apiKeyValue = data.apiKeyValue;
     console.log("Creating API key for user ID:", userId);
     console.log("Key hash to be saved:", keyHash);
 
   const newApiKey = await apikeyModel.create({
       userId: userId,
       keyHash: keyHash,
+      apiKeyValue: apiKeyValue,
     });
     
 
