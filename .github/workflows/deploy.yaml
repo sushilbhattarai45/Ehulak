@@ -23,6 +23,8 @@ jobs:
             cd Ehulak
             git pull
             cd frontend
+            docker stop ehulak-frontend || true
+            docker rm ehulak-frontend || true
             docker build -t ehulak-frontend .
             docker run -d --name ehulak-frontend -p 127.0.0.1:3000:80 --restart unless-stopped ehulak-frontend 
             cd ../server
