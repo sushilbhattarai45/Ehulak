@@ -23,7 +23,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 app.get("/", (req, res) => {
-  res.send("Hello World. testing the deployment");
+  res.send("Hello World. testing the deployment v2");
 });
 
 app.use("/email", emailMiddleware, emailRouter);
