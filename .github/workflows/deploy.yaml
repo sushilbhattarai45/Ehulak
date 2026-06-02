@@ -22,32 +22,10 @@ jobs:
             source ~/.nvm/nvm.sh
             cd Ehulak
             git pull
-
-      - name : Dockerized frontend
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{secrets.HOST_DO}}
-          username: root
-          key: ${{secrets.SSH_KEY_DO}}
-          script: |
-            source ~/.nvm/nvm.sh
             cd frontend
             docker build -t ehulak-frontend .
             docker run -d --name ehulak-frontend -p 127.0.0.1:3000:80 --restart unless-stopped ehulak-frontend 
-      
-      - name : Health check
-        run: |
-          curl -f http://127.0.0.1:3000 || exit 1
-       
-      - name : Setting server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{secrets.HOST_DO}}
-          username: root
-          key: ${{secrets.SSH_KEY_DO}}
-          script: |
-            source ~/.nvm/nvm.sh
-            cd Ehulak/server
+            cd ../server
             git pull
             npm install
             pm2 restart all

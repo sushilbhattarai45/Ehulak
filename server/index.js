@@ -23,7 +23,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 app.get("/", (req, res) => {
-  res.send("Welcome to the Ehulak API. This is version 2.0.0. ");
+  res.send("Welcome to the Ehulak API. This is version 2.0.1. ");
 });
 
 app.use("/email", emailMiddleware, emailRouter);

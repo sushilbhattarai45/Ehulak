@@ -137,7 +137,7 @@ export default function Landing() {
               <br className="hidden sm:block" />
               <span className="text-muted-foreground font-normal text-3xl sm:text-[2rem]">
                 {" "}
-                email delivery service.
+                Email Delivery Service.
               </span>
             </h1>
 
