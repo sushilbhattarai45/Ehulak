@@ -33,6 +33,7 @@ jobs:
             pm2 restart all
   test:
     runs-on: ubuntu-latest
+    needs: deploy
     steps:
       - name: Checkout
         uses: actions/checkout@v4
