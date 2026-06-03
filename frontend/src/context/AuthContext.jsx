@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }) => {
       console.log("API key fetch response:", res.data);
       if (res.data && res.data.apiKey) {
         setApiKey(res.data.apiKey);
-        console.log("hisiid" + apiKey);
         localStorage.setItem("apiKey", res.data.apiKey);
         return res.data.apiKey;
       }
