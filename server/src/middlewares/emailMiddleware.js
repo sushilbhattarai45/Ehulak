@@ -38,7 +38,6 @@ export const emailMiddleware = async (req, res, next) => {
         .status(401)
         .json({ success: false, message: "API key is not active" });
     }
-
     req.user = { userId: apiKeyRecord.userId };
     next();
   } catch (error) {

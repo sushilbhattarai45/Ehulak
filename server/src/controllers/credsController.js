@@ -95,3 +95,41 @@ export const getAPiKeyForUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+
+export const deleteAPIKey = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const apiKeyValue = req.body.apiKeyValue;
+    await redisConfig.del(`apiKey:${apiKeyValue}`);
+    await redisConfig.del(`userApiKey:${userId}`);
+
+    let deleteApiKey = await ApiKeyModel.findOne({ apiKeyValue });
+    if (deleteApiKey) {
+      await deleteApiKey.deleteOne();
+    }
+    res.json({ success: true, message: "API key deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting API key:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const disableAPIKey = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const apiKeyValue = req.body.apiKeyValue;
+    await redisConfig.set(`apiKey:${apiKeyValue}`, JSON.stringify({
+      isActive: false,
+    }));
+    let disableApiKey = await ApiKeyModel.findOne({ apiKeyValue });
+      if (disableApiKey) {
+        disableApiKey.isActive = false;
+          await disableApiKey.save();
+      }
+    res.json({ success: true, message: "API key disabled successfully" });
+  } catch (error) {
+    console.error("Error disabling API key:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
