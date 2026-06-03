@@ -1,36 +1,100 @@
-version: "3.8"
-
-name: "email-system"
+version: "3.9"
 
 services:
+  api:
+    build: .
+    image: ehulak-server
+
+    container_name: api
+    command: node index.js
+    ports:
+      - "3002:3002"
+    depends_on:
+      - kafka
+      - redis
+    restart: unless-stopped
+  email-consumer:
+    build: .
+    image: ehulak-server
+    container_name: email-consumer
+    command: node src/kafka/consumer/emailConsumer.js
+    restart: unless-stopped
+
+
+  email-worker:
+    build: .
+    image: ehulak-server
+
+    container_name: email-worker
+    command: node src/workers/emailWorker.js
+    restart: unless-stopped
+  apikey-consumer:
+    build: .
+    image: ehulak-server
+    container_name: apikey-consumer
+    command: node src/kafka/consumer/apiKeyConsumer.js
+    restart: unless-stopped
+  apikey-worker:
+    build: .
+    image: ehulak-server
+    container_name: apikey-worker
+    command: node src/workers/apiKeyWorker.js
+    restart: unless-stopped
+  user-consumer:
+    build: .
+    image: ehulak-server
+    container_name: user-consumer
+    command: node src/kafka/consumer/userActivityConsumer.js
+    restart: unless-stopped
+  user-worker:
+    build: .
+    image: ehulak-server
+    container_name: user-worker
+    command: node src/workers/userActivityWorker.js
+    restart: unless-stopped
+  dlq-worker:
+    build: .
+    image: ehulak-server
+    container_name: dlq-worker
+    command: node src/workers/dlqWorker.js
+    restart: unless-stopped
+  sent-email-worker:
+    build: .
+    image: ehulak-server
+    container_name: sent-email-worker
+    command: node src/workers/sentEmailWorker.js
+    restart: unless-stopped 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
-    container_name: email-zookeeper
+    container_name: zookeeper
     ports:
       - "2181:2181"
+    
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-
+    
   kafka:
     image: confluentinc/cp-kafka:7.3.0
-    container_name: email-kafka
-    depends_on:
-      - zookeeper
+    container_name: kafka
     ports:
       - "9092:9092"
+    depends_on:
+      - zookeeper
+
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       
       # LISTENER CONFIG (simple + stable)
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://159.203.174.94:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   redis:
-    image: redis:latest
-    container_name: email-redis
+    image: redis:7
+    container_name: redis
     ports:
       - "6379:6379"
+

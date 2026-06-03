@@ -1,7 +1,7 @@
 import ioredis from "ioredis";
 
  const redisConfig = new ioredis({
-    host: "localhost",
+    host: "redis",
     port: 6379,
     maxRetriesPerRequest: null,
 })
