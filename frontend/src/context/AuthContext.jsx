@@ -69,6 +69,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await axiosInstance.post("/auth/google", { credential });
+
+      alert(JSON.stringify(res.data));
       const { accessToken: token, user: userData } = res.data;
       setAccessToken(token);
       localStorage.setItem("accessToken", token);
@@ -76,7 +78,6 @@ export const AuthProvider = ({ children }) => {
       if (userData?.firstTimeLogin) {
         return { success: true, needsProfile: true, user: userData, accessToken: token };
       }
-
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
       if (userData?.userId) await fetchApiKey(userData.userId);
@@ -250,10 +251,15 @@ const logout = () => {
 }, []);
 
   useEffect(() => {
-    if (apiKey&& !emailEvents.emails.length) {
+    // if (apiKey&& !emailEvents.emails.length) {
+    //   getEmailEvents(1);
+    // }
+    // if (apiKey&& !dlqEmails.emails.length) {
+    //   getDLQEmails(1);
+    // }
+    if(accessToken)
+    {
       getEmailEvents(1);
-    }
-    if (apiKey&& !dlqEmails.emails.length) {
       getDLQEmails(1);
     }
   }, [user]);

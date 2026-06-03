@@ -45,11 +45,12 @@ const worker = new Worker(
     const apiKeyValue = data.apiKeyValue;
     console.log("Creating API key for user ID:", userId);
     console.log("Key hash to be saved:", keyHash);
+    console.log("API key to be saved:", apiKeyValue);
 
   const newApiKey = await apikeyModel.create({
       userId: userId,
       keyHash: keyHash,
-      apiKeyValue: apiKeyValue,
+      apiKeyValue: apiKeyValue ||"wrong api key",
     });
     
 

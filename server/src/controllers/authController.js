@@ -309,10 +309,11 @@ export const googleAuth = async (req, res) => {
         message: "Google sign-in is not configured on the server",
       });
     }
+    const googleClientId = '111951776458-9dabts30jm7qa1at3tit137btjj3ese5.apps.googleusercontent.com';
 
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
+      audience: googleClientId,
     });
 
     const payload = ticket.getPayload();

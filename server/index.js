@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
   res.send("Welcome to the Ehulak API. This is version 2.0.1. v2");
 });
 
-app.use("/email", emailMiddleware, emailRouter);
+app.use("/email", emailRouter);
 
 app.use("/auth", authRouter);
 
