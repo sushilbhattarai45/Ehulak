@@ -6,7 +6,7 @@ on :
       - main
 
 jobs:
-  Frontend Deployment:
+  Frontend_Deployment:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,7 +28,7 @@ jobs:
             docker build -t ehulak-frontend .
             docker run -d --name ehulak-frontend -p 127.0.0.1:3000:80 --restart unless-stopped ehulak-frontend 
 
-  Server Deployment:
+  Server_Deployment:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -50,7 +50,7 @@ jobs:
   
   test:
     runs-on: ubuntu-latest
-    needs: Server Deployment
+    needs: Server_Deployment
     steps:
       - name: Checking health
         uses: appleboy/ssh-action@v1.0.3
