@@ -39,6 +39,7 @@ function issueAuthTokens(user, res) {
       accountType: user.accountType,
       firstTimeLogin: user.firstTimeLogin ?? false,
       organization: user.organization || null,
+      useCustomSMTP: user.useCustomSMTP === true,
     },
   };
 }
@@ -295,6 +296,7 @@ export const registerUser = async (req, res) => {
 export const googleAuth = async (req, res) => {
   try {
     const { credential } = req.body;
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
     if (!credential) {
       return res.status(400).json({
@@ -309,10 +311,9 @@ export const googleAuth = async (req, res) => {
         message: "Google sign-in is not configured on the server",
       });
     }
-
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
+      audience: googleClientId,
     });
 
     const payload = ticket.getPayload();
@@ -398,7 +399,7 @@ export const logout = (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { userId, name, image, organization } = req.body;
+    const { userId, name, image, organization, useCustomSMTP } = req.body;
 
     console.log("Updating user with ID:", userId);
     const user = await User.findOne({ userId });
@@ -416,6 +417,9 @@ export const updateUser = async (req, res) => {
     user.organization = organization || user.organization;
     user.status = "active";
     user.firstTimeLogin = false;
+    if (typeof useCustomSMTP === "boolean") {
+      user.useCustomSMTP = useCustomSMTP;
+    }
 
     await user.save();
 
@@ -434,6 +438,7 @@ export const updateUser = async (req, res) => {
         accountType: user.accountType,
         userStatus: user.status,
         firstTimeLogin: user.firstTimeLogin,
+        useCustomSMTP: user.useCustomSMTP,
         organization: user.organization || null,
       },
     });

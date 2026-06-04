@@ -17,7 +17,7 @@ const NAV = [
   // { to: "/campaigns", label: "Campaigns", icon: Send },
   { to: "/dlq", label: "Dead Letter Queue", icon: AlertTriangle },
   // { to: "/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/api-keys", label: "API Keys", icon: KeyRound },
+  { to: "/api-keys", label: "SMTPs & API Keys", icon: KeyRound },
   { to: "/docs", label: "Documentation", icon: BookOpen },
 ];
 

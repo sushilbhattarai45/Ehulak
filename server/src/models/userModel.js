@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  /** When true, outgoing mail uses the user's saved SMTP; when false, platform SMTP is used (SMTP config may still exist). */
+  useCustomSMTP: {
+    type: Boolean,
+    default: false,
+  },
   organization: { type: String },
   password: {
     type: String,
