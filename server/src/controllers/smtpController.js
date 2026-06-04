@@ -3,6 +3,9 @@ import smtpModel from "../models/smtpModel.js";
 import redisConfig from "../config/redisConfig.js";
 import crypto from "crypto";
 import dotenv from "dotenv";
+import { deleteTransporter }
+from "../utils/transporterCache.js";
+
 dotenv.config();
 const ALGORITHM = "aes-256-gcm";
 
@@ -269,7 +272,7 @@ export const updateSMTP = async (req, res) => {
       
       await smtpModel.deleteOne({ smtpId });
       await redisConfig.del(`smtp:${smtpId}`);
-
+      deleteTransporter(smtp.userId);
       return res.status(200).json({
       success: true,
       message: "SMTP deleted successfully",

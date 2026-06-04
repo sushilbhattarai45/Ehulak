@@ -6,30 +6,13 @@ import {
   appendWorkerPickup,
   finalizeLastAttempt,
 } from "../utils/workerHistory.js";
-
+import userModel from "../models/userModel.js";
+import smtpModel from "../models/smtpModel.js";
 
 import dotenv from "dotenv";
 dotenv.config();
 import sgMail from '@sendgrid/mail';
-
-// const transporter = nodemailer.createTransport({
-//   host: "smtp.hostinger.com",
-//   port: 587,
-//   secure: false, // IMPORTANT
-//   auth: {
-//     user: 'support@ehulak.tech',
-//     pass: 'Pass@H#2004',
-//   },
-//   requireTLS: true,
-//   pool: true,
-//   maxConnections: 4,
-//   maxMessages: 100,
-//   rateDelta: 1000,
-//   rateLimit: 4,
-//   tls: {
-//     rejectUnauthorized: false,
-//   },
-// });
+import { getTransporter } from "../utils/transporterCache.js";
 
 // (async () => {
 
@@ -130,15 +113,50 @@ const sendEmail = async (jobData, workerHistory) => {
   };
 try{
 
-  console.log("Mail options:", mailOptions);  
-  // await transporter.sendMail(mailOptions);
-  await sgMail.send(mailOptions);
-  console.log("Email sent successfully to:", JSON.stringify(fields));
+  let customSMTP = false;
+  let smtpDetails={};
+// check if user is using custom SMTP
+const user = await userModel.findOne({ userId: fields.userId });
+if(!user){
+  console.error("User not found");
+  throw new Error("User not found");
+}
 
+if (user.useCustomSMTP) {
+  const smtp = await smtpModel.findOne({ userId: fields.userId });
+  if (!smtp) {
+    throw new Error("Custom SMTP enabled but config not found");
+  }
+  customSMTP = true;
+  smtpDetails = {
+    userId: fields.userId,
+    host: smtp.hostname,
+    from: smtp.from,
+    port: smtp.port,
+    username: smtp.username,
+    password: smtp.password,
+  };
+  mailOptions.from = smtpDetails.from;
+
+
+  const transporter = getTransporter(smtpDetails);
+
+  await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+    return true;
+
+}
+
+else
+{
+  await sgMail.send(mailOptions);
+  console.log("Email sent successfully to:", JSON.stringify(mailOptions));
+}
   sentEmailQueue.add(
     "sentEmail",
     {
-      from: fields.from,
+      customSMTP: customSMTP,
+      from: smtpDetails.from || fields.from,
       to: fields.to,
       subject: fields.subject,
       body: fields.body,
@@ -162,7 +180,6 @@ try{
   console.error("Error sending email:", error);
   throw error;
 }
-
 };
 
 worker.on("failed", (job, err) => {
