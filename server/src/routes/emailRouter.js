@@ -9,15 +9,16 @@ import {
   getEmailEventById,
 } from "../controllers/emailController.js";
 import { rateLimitMiddleware } from "../middlewares/rateLimitMiddleware.js";
+import { emailMiddleware } from "../middlewares/emailMiddleware.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";  
+emailRouter.post("/processEmail", emailMiddleware, processEmail);
 
-emailRouter.post("/processEmail", rateLimitMiddleware, processEmail);
+emailRouter.get("/getDLQEmails", authMiddleware, getDLQEmails);
 
-emailRouter.get("/getDLQEmails", getDLQEmails);
+emailRouter.get("/getSentEmails", authMiddleware, getSentEmails);
 
-emailRouter.get("/getSentEmails", getSentEmails);
+emailRouter.get("/getEmailEvents", authMiddleware, getEmailEvents);
 
-emailRouter.get("/getEmailEvents", getEmailEvents);
-
-emailRouter.get("/getEmailEvent/:id", getEmailEventById);
+emailRouter.get("/getEmailEvent/:id", authMiddleware, getEmailEventById);
 
 export default emailRouter;

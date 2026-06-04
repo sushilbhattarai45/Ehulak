@@ -3,19 +3,35 @@ import { producer } from "../kafka/producer.js";
 import dlqEmailModel from "../models/dlqEmails.js";
 import sentEmailModel from "../models/sentEmailModel.js";
 import mongoose from "mongoose";
+
 let count = 0;
+import { z, ZodError } from "zod";
 
+const schema = z.object({
+  to: z.string().includes('@'),
+
+  subject: z
+    .string()
+    .min(1, { message: "Subject is required" }),
+
+  body: z
+    .string()
+    .min(1, { message: "Body is required" }),
+
+  html: z
+    .string()
+    .min(1, { message: "HTML content is required" }),
+
+  campaign: z
+    .string()
+    .min(1, { message: "Campaign name is required" }),
+});
 export async function processEmail(req, res) {
-  const { to,  subject, body, html, campaign } = req.body;
-
-  if(!to  || !subject || !body || !html || !campaign) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-  if(!html) 
-    {
-      return res.status(400).json({ error: "HTML is required" });
-    }
   try {
+    const validatedData = schema.parse(req.body);
+    const { to, subject, body, html, campaign } = validatedData;
+
+
     console.log("Received email processing request with body:");
     const data = {
       to: to,
@@ -38,11 +54,16 @@ export async function processEmail(req, res) {
       .status(200)
       .json({ message: `Email will be sent to ${to} shortly!` });
   } catch (error) {
-    // console.error("Error fetching email details:", error);
-    res.status(500).json({ error: error.message || "Internal Server Error" });
-  }
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        error: "Validation failed",
+        issues: z.flattenError(error).fieldErrors,
+      });
+    } else {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
 }
-
+}
 export async function getDLQEmails(req, res) {
   try {
     const userId = req.user.userId;

@@ -16,6 +16,8 @@ export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
 
+
+
   const page = emailEvents.page || 1;
   const totalPages = emailEvents.totalPages || 1;
 

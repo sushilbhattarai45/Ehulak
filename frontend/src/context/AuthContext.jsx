@@ -69,6 +69,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await axiosInstance.post("/auth/google", { credential });
+
+      alert(JSON.stringify(res.data));
       const { accessToken: token, user: userData } = res.data;
       setAccessToken(token);
       localStorage.setItem("accessToken", token);
@@ -76,7 +78,6 @@ export const AuthProvider = ({ children }) => {
       if (userData?.firstTimeLogin) {
         return { success: true, needsProfile: true, user: userData, accessToken: token };
       }
-
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
       if (userData?.userId) await fetchApiKey(userData.userId);
@@ -128,6 +129,37 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (e) {
       toast.error(e?.response?.data?.message || "Signup failed");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateUseCustomSMTP = async (useCustomSMTP) => {
+    if (!user?.userId) return false;
+    const previous = user.useCustomSMTP;
+    setUser((prev) => (prev ? { ...prev, useCustomSMTP } : prev));
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post("/auth/updateUser", {
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+        organization: user.organization,
+        useCustomSMTP,
+      });
+      const userData = res.data.user;
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      toast.success(
+        userData.useCustomSMTP
+          ? "Custom SMTP enabled"
+          : "Custom SMTP disabled — using platform SMTP",
+      );
+      return true;
+    } catch (e) {
+      setUser((prev) => (prev ? { ...prev, useCustomSMTP: previous } : prev));
+      toast.error(e?.response?.data?.message || "Failed to update SMTP preference");
       return false;
     } finally {
       setLoading(false);
@@ -250,10 +282,15 @@ const logout = () => {
 }, []);
 
   useEffect(() => {
-    if (apiKey&& !emailEvents.emails.length) {
+    // if (apiKey&& !emailEvents.emails.length) {
+    //   getEmailEvents(1);
+    // }
+    // if (apiKey&& !dlqEmails.emails.length) {
+    //   getDLQEmails(1);
+    // }
+    if(accessToken)
+    {
       getEmailEvents(1);
-    }
-    if (apiKey&& !dlqEmails.emails.length) {
       getDLQEmails(1);
     }
   }, [user]);
@@ -273,6 +310,7 @@ const logout = () => {
         createOtp,
         validateOtp,
         updateUser,
+        updateUseCustomSMTP,
         completeFirstLogin,
         logout,
         apiKey,
