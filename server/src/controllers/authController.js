@@ -296,6 +296,7 @@ export const registerUser = async (req, res) => {
 export const googleAuth = async (req, res) => {
   try {
     const { credential } = req.body;
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
     if (!credential) {
       return res.status(400).json({
@@ -310,8 +311,6 @@ export const googleAuth = async (req, res) => {
         message: "Google sign-in is not configured on the server",
       });
     }
-    const googleClientId = '111951776458-9dabts30jm7qa1at3tit137btjj3ese5.apps.googleusercontent.com';
-
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
       audience: googleClientId,

@@ -8,11 +8,23 @@ import {
 } from "../utils/workerHistory.js";
 import userModel from "../models/userModel.js";
 import smtpModel from "../models/smtpModel.js";
-
+import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
 import dotenv from "dotenv";
 dotenv.config();
 import sgMail from '@sendgrid/mail';
 import { getTransporter } from "../utils/transporterCache.js";
+import connectDb from "../db/connectDb.js";
+
+(
+  async () => {
+ try{
+  await connectDb();
+  console.log("Connected to the database");
+ }catch(error){
+  console.error("Error connecting to the database:", error);
+ }
+  }
+)();
 
 // (async () => {
 
@@ -79,13 +91,7 @@ const worker = new Worker(
 const getEmailFields = (emailData) => {
   const payload = emailData.emailData || emailData;
 
-  console.log("Payload:", payload);
-  console.log("Payload HTML:", payload.html);
-  console.log("Payload Body:", payload.body);
-  console.log("Payload Subject:", payload.subject);
-  console.log("Payload User ID:", payload.userId);
-  console.log("Payload Campaign:", payload.campaign);
-  console.log("Payload Message ID:", payload.messageId);
+  console.log("Payload:", JSON.stringify(payload));
   return {
     to: payload.to,
     from: 'noreply@ehulak.tech',
@@ -101,7 +107,7 @@ const getEmailFields = (emailData) => {
 
 const sendEmail = async (jobData, workerHistory) => {
   const fields = getEmailFields(jobData.emailData);
-  console.log("Sending email to:", fields.to);
+  console.log("Sending email to:", JSON.stringify(fields));
 
   const mailOptions = {
     from: fields.from,
@@ -116,7 +122,10 @@ try{
   let customSMTP = false;
   let smtpDetails={};
 // check if user is using custom SMTP
+
+console.log('user id:', fields.userId);
 const user = await userModel.findOne({ userId: fields.userId });
+
 if(!user){
   console.error("User not found");
   throw new Error("User not found");
@@ -128,25 +137,24 @@ if (user.useCustomSMTP) {
     throw new Error("Custom SMTP enabled but config not found");
   }
   customSMTP = true;
+
+  console.log('smtp port:', smtp.port);
   smtpDetails = {
     userId: fields.userId,
-    host: smtp.hostname,
+    host: decrypt(smtp.hostname),
     from: smtp.from,
     port: smtp.port,
-    username: smtp.username,
-    password: smtp.password,
+    username: decrypt(smtp.username),
+    password: decrypt(smtp.password),
   };
-  mailOptions.from = smtpDetails.from;
-
 
   const transporter = getTransporter(smtpDetails);
-
+mailOptions.from = smtpDetails.from;
   await transporter.sendMail(mailOptions);
     console.log("Email sent successfully");
     return true;
 
 }
-
 else
 {
   await sgMail.send(mailOptions);
@@ -156,7 +164,7 @@ else
     "sentEmail",
     {
       customSMTP: customSMTP,
-      from: smtpDetails.from || fields.from,
+      from: customSMTP ? smtpDetails.from : fields.from,
       to: fields.to,
       subject: fields.subject,
       body: fields.body,

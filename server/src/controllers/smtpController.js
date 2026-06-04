@@ -5,58 +5,31 @@ import crypto from "crypto";
 import dotenv from "dotenv";
 import { deleteTransporter }
 from "../utils/transporterCache.js";
+import { z, ZodError } from "zod";
+import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
 
-dotenv.config();
-const ALGORITHM = "aes-256-gcm";
 
-const ENCRYPTION_KEY = crypto
-  .createHash("sha256")
-  .update(process.env.ENCRYPTION_SECRET)
-  .digest();
+const schema = z.object({
+  hostname: z.string().min(1, "Hostname is required"),
 
-export function encrypt(text) {
-  const iv = crypto.randomBytes(16);
+  port: z
+    .number({
+      error: "Port must be a number",
+    })
+    .min(1, "Port must be at least 1")
+    .max(65535, "Port must be at most 65535"),
 
-  const cipher = crypto.createCipheriv(
-    ALGORITHM,
-    ENCRYPTION_KEY,
-    iv
-  );
+  username: z.string().min(1, "Username is required"),
 
-  let encrypted = cipher.update(String(text), "utf8", "hex");
-  encrypted += cipher.final("hex");
+  password: z.string().min(1, "Password is required"),
 
-  const authTag = cipher.getAuthTag();
+  name: z.string().min(1, "SMTP name is required"),
 
-  return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted}`;
-}
-
-export function decrypt(payload) {
-  const [ivHex, authTagHex, encryptedHex] =
-    payload.split(":");
-
-  const decipher = crypto.createDecipheriv(
-    ALGORITHM,
-    ENCRYPTION_KEY,
-    Buffer.from(ivHex, "hex")
-  );
-
-  decipher.setAuthTag(
-    Buffer.from(authTagHex, "hex")
-  );
-
-  let decrypted = decipher.update(
-    encryptedHex,
-    "hex",
-    "utf8"
-  );
-
-  decrypted += decipher.final("utf8");
-
-  return decrypted;
-}
+  from: z.string().includes('@'),
+});
 
 export const createSMTP = async (req, res) => {
+ 
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -64,9 +37,8 @@ export const createSMTP = async (req, res) => {
         message: "Unauthorized",
       });
     }
-   
-    const { hostname, port, username, password, name } =
-      req.body;
+    const validatedData = schema.parse(req.body);
+    const { hostname, port, username, password, name, from } = validatedData;
       //demo json
     //   const demoJson = {
     //     hostname: "smtp.gmail.com",
@@ -77,27 +49,6 @@ export const createSMTP = async (req, res) => {
     //   };
 
     const userId = req.user.userId;
-
-    if (!hostname || !port || !username || !password || !name) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
-    }
-
-    if (typeof hostname !== "string" || typeof port !== "number" || typeof username !== "string" || typeof password !== "string" || typeof name !== "string") {
-      return res.status(400).json({
-        success: false,
-        message: "All fields must be strings",
-      });
-    }
-    if (port < 1 || port > 65535) {
-      return res.status(400).json({
-        success: false,
-        message: "Port must be between 1 and 65535",
-      });
-    }
-
     //cange port to string
    
 
@@ -120,6 +71,7 @@ export const createSMTP = async (req, res) => {
       username: encrypt(username),
       password: encrypt(password),
       name,
+      from,
     });
 
     console.log("SMTP created successfully", newSmtp);
@@ -127,17 +79,19 @@ export const createSMTP = async (req, res) => {
     return res.json({
       success: true,
       message: "SMTP created successfully",
-      smtp: newSmtp,
     });
   } catch (error) {
-    console.error(error);
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        error: "Validation failed",
+        issues: z.flattenError(error).fieldErrors,
+      });
+    } else {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+}
 
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
 export const getUserSMTPs = async (req, res) => {
   try {
     if (!req.user) {
@@ -165,6 +119,7 @@ export const getUserSMTPs = async (req, res) => {
         port: smtp.port,
         username: decrypt(smtp.username),
         name: smtp.name,
+        from: smtp.from,
         password: "********",
       })),
       message: "SMTPs fetched successfully",
@@ -199,6 +154,7 @@ export const getSMTP = async (req, res) => {
         port: smtp.port,
         username: decrypt(smtp.username),
         name: smtp.name,
+        from: smtp.from,
         password: "********",
       },
     });
@@ -214,15 +170,18 @@ export const getSMTP = async (req, res) => {
 
 export const updateSMTP = async (req, res) => {
     try {
-      const {
-        smtpId,
-        hostname,
-        port,
-        username,
-        password,
-        name,
-      } = req.body;
-  
+   
+      const {smtpId} = req.body;
+      const validatedData = schema.parse(req.body);
+      const { hostname, port, username, password, name, from } = validatedData;
+      if (!smtpId) {
+        return res.status(400).json({
+          success: false,
+          message: "SMTP ID is required",
+        });
+      }
+
+
       const smtp = await smtpModel.findOne({ smtpId });
   
       if (!smtp) {
@@ -240,16 +199,26 @@ export const updateSMTP = async (req, res) => {
           username: encrypt(username),
           password: encrypt(password),
           name,
+          from,
         }
       );
+      deleteTransporter(smtp.userId);
+      await redisConfig.del(`smtp:${smtpId}`);
+      await redisConfig.set(`smtp:${smtpId}`, JSON.stringify(smtp));
   
       return res.json({
         success: true,
         message: "SMTP updated successfully",
       });
     } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          error: "Validation failed",
+          issues: z.flattenError(error).fieldErrors,
+        });
+      }
       console.error(error);
-  
+
       return res.status(500).json({
         success: false,
         message: "Internal server error",
@@ -304,6 +273,7 @@ export const updateSMTP = async (req, res) => {
           port: smtp.port,
           username: decrypt(smtp.username),
           name: smtp.name,
+          from: smtp.from,
           password: "********",
         },
       });

@@ -7,6 +7,7 @@ const smtpSchema = new mongoose.Schema({
   port: { type: Number, required: true },
   smtpId: { type: String, required: true },
   username: { type: String, required: true },
+  from: { type: String, required: true},
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
