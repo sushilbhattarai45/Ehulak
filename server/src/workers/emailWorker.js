@@ -106,6 +106,7 @@ const getEmailFields = (emailData) => {
 };
 
 const sendEmail = async (jobData, workerHistory) => {
+  console.log("-----------------------------------------------");
   const fields = getEmailFields(jobData.emailData);
   console.log("Sending email to:", JSON.stringify(fields));
 
@@ -125,6 +126,7 @@ try{
 
 console.log('user id:', fields.userId);
 const user = await userModel.findOne({ userId: fields.userId });
+console.log('user:', JSON.stringify(user));
 
 if(!user){
   console.error("User not found");
@@ -133,7 +135,10 @@ if(!user){
 
 if (user.useCustomSMTP) {
   const smtp = await smtpModel.findOne({ userId: fields.userId });
+  console.log('smtp:', JSON.stringify(smtp));
   if (!smtp) {
+    console.error("Custom SMTP enabled but config not found");
+
     throw new Error("Custom SMTP enabled but config not found");
   }
   customSMTP = true;
@@ -147,6 +152,7 @@ if (user.useCustomSMTP) {
     username: decrypt(smtp.username),
     password: decrypt(smtp.password),
   };
+  console.log('smtpDetails:', JSON.stringify(smtpDetails));
 
   const transporter = getTransporter(smtpDetails);
 mailOptions.from = smtpDetails.from;
