@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const smtpSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   name: { type: String, required: false, default: "default" },
-  smtp: { type: String, required: true },
+  hostname: { type: String, required: true },
   port: { type: Number, required: true },
   smtpId: { type: String, required: true },
   username: { type: String, required: true },

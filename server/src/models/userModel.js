@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  useCustomSMTP: {
+    type: Boolean,
+    default: false,
+  },
   organization: { type: String },
   password: {
     type: String,

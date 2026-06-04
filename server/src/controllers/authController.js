@@ -399,7 +399,7 @@ export const logout = (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { userId, name, image, organization } = req.body;
+    const { userId, name, image, organization, useCustomSMTP } = req.body;
 
     console.log("Updating user with ID:", userId);
     const user = await User.findOne({ userId });
@@ -417,6 +417,7 @@ export const updateUser = async (req, res) => {
     user.organization = organization || user.organization;
     user.status = "active";
     user.firstTimeLogin = false;
+    user.useCustomSMTP = useCustomSMTP || user.useCustomSMTP;
 
     await user.save();
 
@@ -435,6 +436,7 @@ export const updateUser = async (req, res) => {
         accountType: user.accountType,
         userStatus: user.status,
         firstTimeLogin: user.firstTimeLogin,
+        useCustomSMTP: user.useCustomSMTP,
         organization: user.organization || null,
       },
     });
