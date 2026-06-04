@@ -135,6 +135,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUseCustomSMTP = async (useCustomSMTP) => {
+    if (!user?.userId) return false;
+    const previous = user.useCustomSMTP;
+    setUser((prev) => (prev ? { ...prev, useCustomSMTP } : prev));
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post("/auth/updateUser", {
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+        organization: user.organization,
+        useCustomSMTP,
+      });
+      const userData = res.data.user;
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      toast.success(
+        userData.useCustomSMTP
+          ? "Custom SMTP enabled"
+          : "Custom SMTP disabled — using platform SMTP",
+      );
+      return true;
+    } catch (e) {
+      setUser((prev) => (prev ? { ...prev, useCustomSMTP: previous } : prev));
+      toast.error(e?.response?.data?.message || "Failed to update SMTP preference");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateUser = async (userId, name, email, organization) => {
     setLoading(true);
     try {
@@ -279,6 +310,7 @@ const logout = () => {
         createOtp,
         validateOtp,
         updateUser,
+        updateUseCustomSMTP,
         completeFirstLogin,
         logout,
         apiKey,

@@ -39,6 +39,7 @@ function issueAuthTokens(user, res) {
       accountType: user.accountType,
       firstTimeLogin: user.firstTimeLogin ?? false,
       organization: user.organization || null,
+      useCustomSMTP: user.useCustomSMTP === true,
     },
   };
 }
@@ -417,7 +418,9 @@ export const updateUser = async (req, res) => {
     user.organization = organization || user.organization;
     user.status = "active";
     user.firstTimeLogin = false;
-    user.useCustomSMTP = useCustomSMTP || user.useCustomSMTP;
+    if (typeof useCustomSMTP === "boolean") {
+      user.useCustomSMTP = useCustomSMTP;
+    }
 
     await user.save();
 

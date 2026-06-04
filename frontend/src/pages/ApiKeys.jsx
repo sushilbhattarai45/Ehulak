@@ -95,16 +95,19 @@ function SmtpDetailGrid({ smtp }) {
 }
 
 export default function ApiKeys() {
-  const { apiKey, user, accessToken, fetchApiKey } = useAuth();
+  const { apiKey, user, accessToken, fetchApiKey, updateUseCustomSMTP, setUser } =
+    useAuth();
+  const useCustomSMTP = user?.useCustomSMTP === true;
   const [copied, setCopied] = useState(false);
   const [showKey, setShowKey] = useState(false);
-
   const [smtp, setSmtp] = useState(null);
   const [smtpLoading, setSmtpLoading] = useState(false);
   const [smtpForm, setSmtpForm] = useState(emptySmtpForm);
   /** null = view or empty, "add" | "edit" = form */
   const [smtpFormMode, setSmtpFormMode] = useState(null);
   const [smtpSaving, setSmtpSaving] = useState(false);
+  const [smtpToggleSaving, setSmtpToggleSaving] = useState(false);
+  const canToggleSmtp = Boolean(smtp) || useCustomSMTP;
 
   const loadSmtp = async () => {
     if (!accessToken) return;
@@ -126,8 +129,27 @@ export default function ApiKeys() {
     }
   };
 
+  const syncUserSmtpPreference = async () => {
+    if (!user?.userId || !accessToken) return;
+    try {
+      const res = await axiosInstance.post("/auth/updateUser", {
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+        organization: user.organization,
+      });
+      if (res.data?.user) {
+        setUser(res.data.user);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+      }
+    } catch {
+      /* keep cached user */
+    }
+  };
+
   useEffect(() => {
     loadSmtp();
+    syncUserSmtpPreference();
   }, [accessToken]);
 
   const handleCopy = () => {
@@ -239,6 +261,9 @@ export default function ApiKeys() {
         { smtpId: smtp.smtpId },
         { headers: { Authorization: `Bearer ${accessToken}` } },
       );
+      if (useCustomSMTP) {
+        await updateUseCustomSMTP(false);
+      }
       toast.success("SMTP removed");
       setSmtp(null);
       setSmtpForm(emptySmtpForm);
@@ -246,6 +271,17 @@ export default function ApiKeys() {
     } catch (e) {
       toast.error(e?.response?.data?.message || "Failed to delete SMTP");
     }
+  };
+
+  const toggleUseCustomSMTP = async () => {
+    const enabling = !useCustomSMTP;
+    if (enabling && !smtp) {
+      toast.error("Add SMTP credentials before enabling custom SMTP");
+      return;
+    }
+    setSmtpToggleSaving(true);
+    await updateUseCustomSMTP(enabling);
+    setSmtpToggleSaving(false);
   };
 
   const showSmtpForm = smtpFormMode === "add" || smtpFormMode === "edit";
@@ -303,7 +339,7 @@ export default function ApiKeys() {
       <div className="mt-14 pt-14 border-t border-border">
         <PageHeader
           title="Custom SMTP"
-          description="One SMTP server per account. Edit or delete to change it."
+          description="One SMTP server per account. When enabled, your mail is sent through your server; if that fails, the platform SMTP is used."
           actions={
             smtp && !showSmtpForm ? (
               <div className="flex items-center gap-2">
@@ -325,17 +361,52 @@ export default function ApiKeys() {
             ) : (
               !showSmtpForm &&
               !smtp && (
-                <button
-                  type="button"
-                  onClick={startAddSmtp}
-                  className="inline-flex items-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base"
-                >
-                  <Plus className="h-4 w-4" /> Add SMTP
-                </button>
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={startAddSmtp}
+                    className="inline-flex items-center justify-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base whitespace-nowrap"
+                  >
+                    <Plus className="h-4 w-4 shrink-0" /> Add SMTP
+                  </button>
+                </div>
               )
             )
           }
         />
+
+        <div
+          className={`mb-4 rounded-lg border border-border bg-card px-4 py-3 flex items-center justify-between gap-4 shadow-sm ${
+            !canToggleSmtp ? "opacity-60" : ""
+          }`}
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-medium">Use custom SMTP</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {smtp
+                ? useCustomSMTP
+                  ? "Enabled — your SMTP is used first; platform SMTP is used if it fails."
+                  : "Disabled — your SMTP stays saved; sends use platform SMTP only."
+                : "Add SMTP credentials below to enable this option."}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={useCustomSMTP}
+            disabled={!canToggleSmtp || smtpToggleSaving}
+            onClick={toggleUseCustomSMTP}
+            className={`relative shrink-0 h-6 w-11 rounded-full transition-base disabled:cursor-not-allowed ${
+              useCustomSMTP ? "bg-primary" : "bg-muted"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-background shadow transition-transform ${
+                useCustomSMTP ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
 
         {smtpLoading ? (
           <p className="text-center text-muted-foreground text-sm py-8">Loading…</p>
@@ -376,8 +447,14 @@ export default function ApiKeys() {
                 <p className="font-medium text-sm truncate">{smtp.name}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Custom SMTP</p>
               </div>
-              <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25">
-                Active
+              <span
+                className={`shrink-0 text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded-full border ${
+                  useCustomSMTP
+                    ? "bg-primary/15 text-primary border-primary/25"
+                    : "bg-muted text-muted-foreground border-border"
+                }`}
+              >
+                {useCustomSMTP ? "In use" : "Configured"}
               </span>
             </div>
             <div className="px-4 py-4">

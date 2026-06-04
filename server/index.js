@@ -11,14 +11,18 @@ import smtpRouter from "./src/routes/smtpRouter.js";
 
 dotenv.config();
 const app = express();
-app.use(cors());
+app.use(cors(
+  {
+    origin: "*",
+  }
+));
 
 
 app.use(express.json());
 connectDb();
 console.log("connecting to kafka and creating topics...");
 
-const PORT = 3003;
+const PORT = 3002;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
