@@ -15,6 +15,7 @@ const emptySmtpForm = {
   username: "",
   password: "",
   name: "",
+  from: "",
 };
 
 function SmtpFormFields({ form, onChange }) {
@@ -28,6 +29,17 @@ function SmtpFormFields({ form, onChange }) {
           onChange={(e) => onChange("name", e.target.value)}
           className={inputClass}
           placeholder="e.g. Production mail"
+        />
+      </label>
+      <label className="block text-sm sm:col-span-2">
+        <span className="text-muted-foreground">From address</span>
+        <input
+          type="email"
+          value={form.from}
+          onChange={(e) => onChange("from", e.target.value)}
+          className={inputClass}
+          placeholder="noreply@yourdomain.com"
+          autoComplete="off"
         />
       </label>
       <label className="block text-sm">
@@ -79,6 +91,7 @@ function SmtpDetailGrid({ smtp }) {
   const rows = [
     { label: "Hostname", value: smtp.hostname },
     { label: "Port", value: String(smtp.port) },
+    { label: "From", value: smtp.from },
     { label: "Username", value: smtp.username },
     { label: "Password", value: smtp.password || "••••••••" },
   ];
@@ -177,10 +190,20 @@ export default function ApiKeys() {
   };
 
   const validateSmtpForm = () => {
-    const { hostname, port, username, password, name } = smtpForm;
+    const { hostname, port, username, password, name, from } = smtpForm;
     const portNum = Number(port);
-    if (!hostname?.trim() || !username?.trim() || !password || !name?.trim()) {
+    if (
+      !hostname?.trim() ||
+      !username?.trim() ||
+      !password ||
+      !name?.trim() ||
+      !from?.trim()
+    ) {
       toast.error("All SMTP fields are required");
+      return null;
+    }
+    if (!from.trim().includes("@")) {
+      toast.error("From address must be a valid email");
       return null;
     }
     if (!Number.isInteger(portNum) || portNum < 1 || portNum > 65535) {
@@ -193,6 +216,7 @@ export default function ApiKeys() {
       username: username.trim(),
       password,
       name: name.trim(),
+      from: from.trim(),
     };
   };
 
@@ -209,6 +233,7 @@ export default function ApiKeys() {
       username: smtp.username || "",
       password: "",
       name: smtp.name || "",
+      from: smtp.from || "",
     });
     setSmtpFormMode("edit");
   };
