@@ -21,6 +21,7 @@ jobs:
           script: |
             source ~/.nvm/nvm.sh
             cd Ehulak
+            git reset --hard 
             git pull
             cd frontend
             docker stop ehulak-frontend || true
