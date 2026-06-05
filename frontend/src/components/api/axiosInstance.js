@@ -4,7 +4,8 @@ function triggerLogout() {
   window.dispatchEvent(new Event("auth:logout"));
 }
 import { toast } from "sonner";
-const BASE_URL = "http://localhost:3002";
+// const BASE_URL = "http://localhost:3002";
+const BASE_URL = import.meta.env.VITE_API_URL;
 const instance = axios.create({
   baseURL: BASE_URL,
   timeout: 5000,
