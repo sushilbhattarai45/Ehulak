@@ -6,6 +6,7 @@ export const authMiddleware = (req, res, next) => {
     if (!authHeader) {
       return res
         .status(401)
+
         .json({ success: false, message: "Authorization header missing" });
     }
 
@@ -16,9 +17,19 @@ export const authMiddleware = (req, res, next) => {
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
+       if(err.name === "TokenExpiredError") {
         return res
           .status(401)
-          .json({ success: false, message: "Invalid token" });
+          .json({ success: false, message: "Token expired",
+            code: "TOKEN_EXPIRED",
+           });
+       } else {
+        return res
+          .status(401)
+          .json({ success: false, message: "Invalid token",
+            code: "INVALID_TOKEN",
+           });
+       }
       }
       console.log("Decoded token in authMiddleware:", decoded);
       req.user = decoded;

@@ -1,4 +1,4 @@
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import {
   Mail,
@@ -114,7 +114,6 @@ function PipelinePreview() {
 export default function Landing() {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (user) return <Navigate to="/dashboard" replace />;
 
   return (
     <PublicPageShell
@@ -147,25 +146,45 @@ export default function Landing() {
             </p>
 
             <div className="mt-6 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
-              <Link
-                to="/auth"
-                className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-base shadow-[0_0_24px_oklch(0.72_0.14_155/0.25)]"
-              >
-                Sign in
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/auth?mode=signup"
-                className="inline-flex h-10 w-full sm:w-auto items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-medium hover:bg-accent transition-base"
-              >
-                Create account
-              </Link>
-              <Link
-                to="/docs#quick-start"
-                className="inline-flex h-10 w-full sm:w-auto items-center justify-center rounded-md px-5 text-sm font-medium text-muted-foreground hover:text-foreground transition-base"
-              >
-                Read the quick start →
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-base shadow-[0_0_24px_oklch(0.72_0.14_155/0.25)]"
+                  >
+                    Go to dashboard
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    to="/docs#quick-start"
+                    className="inline-flex h-10 w-full sm:w-auto items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-medium hover:bg-accent transition-base"
+                  >
+                    Documentation
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/auth"
+                    className="inline-flex h-10 w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-base shadow-[0_0_24px_oklch(0.72_0.14_155/0.25)]"
+                  >
+                    Sign in
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    to="/auth?mode=signup"
+                    className="inline-flex h-10 w-full sm:w-auto items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-medium hover:bg-accent transition-base"
+                  >
+                    Create account
+                  </Link>
+                  <Link
+                    to="/docs#quick-start"
+                    className="inline-flex h-10 w-full sm:w-auto items-center justify-center rounded-md px-5 text-sm font-medium text-muted-foreground hover:text-foreground transition-base"
+                  >
+                    Read the quick start →
+                  </Link>
+                </>
+              )}
             </div>
 
             <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto lg:mx-0">

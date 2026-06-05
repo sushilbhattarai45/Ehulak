@@ -197,10 +197,13 @@ export default function Auth() {
           </div>
 
           <div className="w-full max-w-sm mx-auto lg:mx-0 lg:w-[380px]">
-            <div className="lg:hidden flex items-center gap-2 justify-center mb-6">
+            <Link
+              to="/"
+              className="lg:hidden flex items-center gap-2 justify-center mb-6 hover:opacity-90 transition-base"
+            >
               <LogoMark className="h-7 w-7" />
               <span className="font-semibold tracking-tight text-lg">Ehulak</span>
-            </div>
+            </Link>
 
             <div className="rounded-xl border border-border bg-card/80 backdrop-blur-sm p-6 shadow-2xl shadow-black/10">
               <div className="text-center mb-6">

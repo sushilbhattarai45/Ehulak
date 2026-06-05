@@ -8,7 +8,7 @@ export const emailMiddleware = async (req, res, next) => {
     const apiKey = req.headers["x-api-key"];
     if (!apiKey) {
       return res
-        .status(401)
+        .status(403)
         .json({ success: false, message: "API key missing" });
     }
 
@@ -18,7 +18,7 @@ export const emailMiddleware = async (req, res, next) => {
       const cachedData = JSON.parse(cachedKey);
       if (!cachedData.isActive) {
         return res
-          .status(401)
+          .status(403)
           .json({ success: false, message: "API key is not active" });
       }
       req.user = { userId: cachedData.userId };
@@ -29,13 +29,13 @@ export const emailMiddleware = async (req, res, next) => {
 
     if (!apiKeyRecord || !apiKeyRecord.userId) {
       return res
-        .status(401)
+        .status(403)
         .json({ success: false, message: "Invalid API key" });
     }
 
     if (!apiKeyRecord.isActive) {
       return res
-        .status(401)
+        .status(403)
         .json({ success: false, message: "API key is not active" });
     }
     req.user = { userId: apiKeyRecord.userId };

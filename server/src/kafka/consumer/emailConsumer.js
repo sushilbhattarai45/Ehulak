@@ -27,7 +27,7 @@ async function consumer() {
           workerHistory: [],
         },
         {
-          attempts: 2,
+          attempts: 3,
           backoff: {
             type: "exponential",
             delay: 2000,

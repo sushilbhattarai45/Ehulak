@@ -22,6 +22,8 @@ export const AuthProvider = ({ children }) => {
 
   const hasFetchedDLQ = useRef(false); // Ref to track if DLQ emails have been fetched at least once
   // Helper to fetch API key for the user
+  const apiKeyDisabledKey = (userId) => `apiKeyDisabled:${userId}`;
+
   const fetchApiKey = async (userId) => {
     try {
       const res = await axiosInstance.get(`/creds/getApiKeyForUser`, {
@@ -40,8 +42,52 @@ export const AuthProvider = ({ children }) => {
       // Optionally show a toast or handle error
       setApiKey(null);
       localStorage.removeItem("apiKey");
+      if (userId) localStorage.removeItem(apiKeyDisabledKey(userId));
     }
     return null;
+  };
+
+  const deleteApiKey = async () => {
+    if (!apiKey || !accessToken) return false;
+    try {
+      await axiosInstance.post(
+        "/creds/deleteApiKey",
+        { apiKeyValue: apiKey },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      setApiKey(null);
+      localStorage.removeItem("apiKey");
+      if (user?.userId) localStorage.removeItem(apiKeyDisabledKey(user.userId));
+      toast.success("API key deleted");
+      return true;
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to delete API key");
+      return false;
+    }
+  };
+
+  const disableApiKey = async () => {
+    if (!apiKey || !accessToken) return false;
+    try {
+      await axiosInstance.post(
+        "/creds/disableApiKey",
+        { apiKeyValue: apiKey },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      if (user?.userId) {
+        localStorage.setItem(apiKeyDisabledKey(user.userId), "true");
+      }
+      toast.success("API key disabled");
+      return true;
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to disable API key");
+      return false;
+    }
+  };
+
+  const isApiKeyDisabled = () => {
+    if (!user?.userId || !apiKey) return false;
+    return localStorage.getItem(apiKeyDisabledKey(user.userId)) === "true";
   };
 
   const createOtp = async (email) => {
@@ -68,9 +114,10 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async (credential) => {
     setLoading(true);
     try {
-      const res = await axiosInstance.post("/auth/google", { credential });
+      const res = await axiosInstance.post("/auth/google", { credential },
+        { withCredentials: true }
+      );
 
-      alert(JSON.stringify(res.data));
       const { accessToken: token, user: userData } = res.data;
       setAccessToken(token);
       localStorage.setItem("accessToken", token);
@@ -94,7 +141,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const res = await axiosInstance.post("/auth/login", { email, password });
+      const res = await axiosInstance.post("/auth/login", { email, password },
+        { withCredentials: true }
+      );
       const { accessToken: token, user: userData } = res.data;
       setAccessToken(token);
       localStorage.setItem("accessToken", token);
@@ -124,7 +173,7 @@ export const AuthProvider = ({ children }) => {
         password,
         accountType: "local",
         status: "active",
-      });
+      },    );
       toast.success("Account created. Please sign in to continue.");
       return true;
     } catch (e) {
@@ -281,6 +330,19 @@ const logout = () => {
 
 }, []);
 
+
+useEffect(() => {
+  const handleLogout = () => {
+    logout();
+  };
+
+  window.addEventListener("auth:logout", handleLogout);
+
+  return () => {
+    window.removeEventListener("auth:logout", handleLogout);
+  };
+}, []);
+
   useEffect(() => {
     // if (apiKey&& !emailEvents.emails.length) {
     //   getEmailEvents(1);
@@ -316,6 +378,9 @@ const logout = () => {
         apiKey,
         accessToken,
         fetchApiKey,
+        deleteApiKey,
+        disableApiKey,
+        isApiKeyDisabled,
         dlqEmails,
         getDLQEmails,
         setDlqEmails,

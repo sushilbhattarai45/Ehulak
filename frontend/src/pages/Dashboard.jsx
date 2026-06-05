@@ -80,7 +80,7 @@ export default function Dashboard() {
       label: "Retries",
       render: (r) =>
         r.retries > 0 || r.source === "dlq" ? (
-          <RetryCounter value={r.retries || (r.source === "dlq" ? 1 : 0)} max={r.maxRetries || 5} />
+          <RetryCounter value={r.retries || (r.source === "dlq" ? 1 : 0)} max={r.maxRetries} />
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         ),

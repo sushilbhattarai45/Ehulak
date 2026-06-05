@@ -8,15 +8,15 @@ import { authMiddleware } from "./src/middlewares/authMiddleware.js";
 import { emailMiddleware } from "./src/middlewares/emailMiddleware.js";
 import credsRouter from "./src/routes/credsRouter.js";
 import smtpRouter from "./src/routes/smtpRouter.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
-app.use(cors(
-  {
-    origin: "*",
-  }
-));
-
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
+app.use(cookieParser());
 
 app.use(express.json());
 connectDb();
