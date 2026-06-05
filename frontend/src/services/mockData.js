@@ -49,7 +49,7 @@ export const EVENTS = Array.from({ length: 64 }).map((_, i) => {
       : status === "retrying"
       ? 1 + Math.floor(rand() * 3)
       : status === "failed"
-      ? 5
+      ? 3
       : 0;
   const minutesAgo = Math.floor(rand() * 60 * 36);
   const ts = new Date(Date.now() - minutesAgo * 60 * 1000).toISOString();
@@ -62,7 +62,7 @@ export const EVENTS = Array.from({ length: 64 }).map((_, i) => {
     recipient: `user${i}@${DOMAINS[Math.floor(rand() * DOMAINS.length)]}`,
     status,
     retries,
-    maxRetries: 5,
+    maxRetries: 3,
     timestamp: ts,
     queue: status === "failed" ? "dlq" : QUEUES[Math.floor(rand() * QUEUES.length)],
     worker: WORKERS[Math.floor(rand() * WORKERS.length)],

@@ -20,13 +20,13 @@ function issueAuthTokens(user, res) {
   const refreshToken = jwt.sign(
     { userId: user.userId },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: "7d" },
+    { expiresIn: "2d" },
   );
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "Strict",
+    secure: false,
+    sameSite: "lax",
   });
 
   return {
@@ -102,6 +102,8 @@ function issueAuthTokens(user, res) {
 export const refreshToken = (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
+
+    console.log("Refresh token:", refreshToken);
     if (!refreshToken) {
       return res
         .status(401)
@@ -109,6 +111,7 @@ export const refreshToken = (req, res) => {
     }
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     const newAccessToken = jwt.sign(
+
       { userId: decoded.userId },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
@@ -116,10 +119,19 @@ export const refreshToken = (req, res) => {
     res.json({ success: true, accessToken: newAccessToken });
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return res.status(401).send("Refresh token expired");
+      return res.status(401).send({
+        success: false,
+        message: "Refresh token expired",
+        code: "REFRESH_TOKEN_EXPIRED",
+      });
     }
 
-    return res.status(403).send("Invalid refresh token");
+    return res.status(403).send({
+      success: false,
+      error: error.message,
+      message: "Invalid refresh token",
+      code: "INVALID_REFRESH_TOKEN",
+    });
   }
 };
 
@@ -367,7 +379,7 @@ export const googleAuth = async (req, res) => {
 
       user = data;
     } else if (user.status && user.status !== "active") {
-      return res.status(401).json({
+      return res.status(403).json({
         success: false,
         message: "User is not active",
       });
@@ -385,7 +397,7 @@ export const googleAuth = async (req, res) => {
     });
   } catch (error) {
     console.error("Google auth error:", error);
-    return res.status(401).json({
+    return res.status(403).json({
       success: false,
       message: "Invalid or expired Google sign-in",
     });

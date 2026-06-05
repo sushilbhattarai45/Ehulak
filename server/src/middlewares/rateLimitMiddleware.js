@@ -6,7 +6,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
     const apiKey = req.headers["x-api-key"];
     if (!apiKey) {
       return res
-        .status(401)
+        .status(403)
         .json({ success: false, message: "API key missing" });
     }
 
@@ -26,14 +26,14 @@ export const rateLimitMiddleware = async (req, res, next) => {
     }
 
     if (hourlyCount > 60) {
-      return res.status(401).json({
+      return res.status(403).json({
         success: false,
         message: "You have reached the maximum number of emails per hour.",
       });
     }
 
     if (minuteCount > 5) {
-      return res.status(401).json({
+      return res.status(403).json({
         success: false,
         message: "You have reached the maximum number of emails per minute.",
       });

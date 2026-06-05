@@ -12,7 +12,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 export default function EmailDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { apiKey } = useAuth();
+  const { accessToken } = useAuth();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,9 +21,7 @@ export default function EmailDetails() {
     setLoading(true);
     setError(null);
     try {
-      const res = await axiosInstance.get(`/email/getEmailEvent/${id}`, {
-        headers: { "x-api-key": apiKey },
-      });
+      const res = await axiosInstance.get(`/email/getEmailEvent/${id}`);
       setEvent(normalizeEvent(res.data.data));
     } catch (e) {
       setError(e?.response?.data?.error || "Failed to load event");
@@ -34,8 +32,8 @@ export default function EmailDetails() {
   };
 
   useEffect(() => {
-    if (apiKey && id) fetchEvent();
-  }, [apiKey, id]);
+    if (accessToken && id) fetchEvent();
+  }, [accessToken, id]);
 
   if (loading) {
     return (
@@ -49,7 +47,7 @@ export default function EmailDetails() {
     return (
       <div className="text-center py-20">
         <div className="text-sm text-muted-foreground">{error || "Event not found"}</div>
-        <Link to="/" className="text-sm text-primary mt-3 inline-block">
+        <Link to="/dashboard" className="text-sm text-primary mt-3 inline-block">
           Back to events
         </Link>
       </div>

@@ -1,3 +1,5 @@
+export const MAX_EMAIL_RETRIES = 3;
+
 const WORKER_LABELS = {
   emailWorker: "Email Worker",
   dlqWorker: "DLQ Worker",
@@ -26,7 +28,7 @@ export function normalizeEvent(e) {
     source: e.source || "sent",
     workerHistory,
     retries: emailWorkerAttempts > 0 ? Math.max(0, emailWorkerAttempts - 1) : 0,
-    maxRetries: 5,
+    maxRetries: MAX_EMAIL_RETRIES,
   };
 }
 

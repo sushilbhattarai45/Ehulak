@@ -2,8 +2,9 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useState, useEffect } from "react";
 
 import axiosInstance from "../components/api/axiosInstance.js";
-import { Plus, Copy, Eye, EyeOff, Trash2, Pencil } from "lucide-react";
+import { Plus, Copy, Eye, EyeOff, Trash2, Pencil, Ban } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
+import { Switch } from "../components/ui/switch.tsx";
 import { toast } from "sonner";
 
 const inputClass =
@@ -108,11 +109,22 @@ function SmtpDetailGrid({ smtp }) {
 }
 
 export default function ApiKeys() {
-  const { apiKey, user, accessToken, fetchApiKey, updateUseCustomSMTP, setUser } =
-    useAuth();
+  const {
+    apiKey,
+    user,
+    accessToken,
+    fetchApiKey,
+    deleteApiKey,
+    disableApiKey,
+    isApiKeyDisabled,
+    updateUseCustomSMTP,
+    setUser,
+  } = useAuth();
   const useCustomSMTP = user?.useCustomSMTP === true;
   const [copied, setCopied] = useState(false);
   const [showKey, setShowKey] = useState(false);
+  const [apiKeyDisabled, setApiKeyDisabled] = useState(() => isApiKeyDisabled());
+  const [apiKeyActionSaving, setApiKeyActionSaving] = useState(false);
   const [smtp, setSmtp] = useState(null);
   const [smtpLoading, setSmtpLoading] = useState(false);
   const [smtpForm, setSmtpForm] = useState(emptySmtpForm);
@@ -165,6 +177,10 @@ export default function ApiKeys() {
     syncUserSmtpPreference();
   }, [accessToken]);
 
+  useEffect(() => {
+    setApiKeyDisabled(isApiKeyDisabled());
+  }, [apiKey, user?.userId]);
+
   const handleCopy = () => {
     if (apiKey) {
       navigator.clipboard.writeText(apiKey);
@@ -174,15 +190,49 @@ export default function ApiKeys() {
   };
 
   const createKey = async () => {
+    if (apiKey) {
+      toast.error("Delete your existing API key before creating a new one");
+      return;
+    }
+    setApiKeyActionSaving(true);
     try {
-      await axiosInstance.post("/creds/createApiKey", {}, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      await fetchApiKey(user._id || user.userId);
+      const res = await axiosInstance.post(
+        "/creds/createApiKey",
+        {},
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      const newKey = res.data?.apiKey || res.data?.data;
+      if (newKey) {
+        await fetchApiKey(user._id || user.userId);
+        setApiKeyDisabled(false);
+      } else {
+        await fetchApiKey(user._id || user.userId);
+      }
       toast.success("API key created");
     } catch (e) {
       toast.error(e?.response?.data?.message || "Failed to create API key");
+    } finally {
+      setApiKeyActionSaving(false);
     }
+  };
+
+  const handleDisableApiKey = async () => {
+    if (!apiKey || apiKeyDisabled) return;
+    setApiKeyActionSaving(true);
+    const ok = await disableApiKey();
+    if (ok) setApiKeyDisabled(true);
+    setApiKeyActionSaving(false);
+  };
+
+  const handleDeleteApiKey = async () => {
+    if (!apiKey) return;
+    setApiKeyActionSaving(true);
+    const ok = await deleteApiKey();
+    if (ok) {
+      setApiKeyDisabled(false);
+      setShowKey(false);
+    }
+    setApiKeyActionSaving(false);
   };
 
   const handleSmtpField = (field, value) => {
@@ -298,8 +348,9 @@ export default function ApiKeys() {
     }
   };
 
-  const toggleUseCustomSMTP = async () => {
-    const enabling = !useCustomSMTP;
+  const toggleUseCustomSMTP = async (checked) => {
+    const enabling = typeof checked === "boolean" ? checked : !useCustomSMTP;
+    if (enabling === useCustomSMTP) return;
     if (enabling && !smtp) {
       toast.error("Add SMTP credentials before enabling custom SMTP");
       return;
@@ -315,12 +366,35 @@ export default function ApiKeys() {
     <div className="max-w-xl mx-auto">
       <PageHeader
         title="API Key"
-        description="Your API key is used to authenticate requests against the Send Email API. Keep it secret!"
+        description="One API key per account. Delete your existing key before creating a new one. Keep it secret!"
         actions={
-          !apiKey && (
+          apiKey ? (
+            <div className="flex items-center gap-2">
+              {!apiKeyDisabled && (
+                <button
+                  type="button"
+                  onClick={handleDisableApiKey}
+                  disabled={apiKeyActionSaving}
+                  className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border text-sm hover:bg-accent transition-base disabled:opacity-50"
+                >
+                  <Ban className="h-4 w-4" /> Disable
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleDeleteApiKey}
+                disabled={apiKeyActionSaving}
+                className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border text-sm text-destructive hover:bg-destructive/10 transition-base disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" /> Delete
+              </button>
+            </div>
+          ) : (
             <button
+              type="button"
               onClick={createKey}
-              className="inline-flex items-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base"
+              disabled={apiKeyActionSaving}
+              className="inline-flex items-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base disabled:opacity-50"
             >
               <Plus className="h-4 w-4" /> Create key
             </button>
@@ -328,8 +402,19 @@ export default function ApiKeys() {
         }
       />
       {apiKey ? (
-        <div className="border border-border rounded-lg bg-card px-4 py-3 flex flex-row items-center gap-4 shadow-sm">
-          <span className="font-semibold text-sm shrink-0">Key</span>
+        <div
+          className={`border border-border rounded-lg bg-card px-4 py-3 flex flex-row items-center gap-4 shadow-sm ${
+            apiKeyDisabled ? "opacity-70" : ""
+          }`}
+        >
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="font-semibold text-sm">Key</span>
+            {apiKeyDisabled && (
+              <span className="text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded-full border bg-muted text-muted-foreground border-border">
+                Disabled
+              </span>
+            )}
+          </div>
           <span className="font-mono text-xs bg-muted px-2 py-1 rounded select-all break-all flex-1 min-w-0">
             {showKey ? apiKey : "••••••••••••••••••••••••••••••••"}
           </span>
@@ -353,6 +438,11 @@ export default function ApiKeys() {
       ) : (
         <p className="text-center text-muted-foreground text-sm py-6">
           No API key yet. Click <strong>Create key</strong> above.
+        </p>
+      )}
+      {apiKey && apiKeyDisabled && (
+        <p className="text-xs text-muted-foreground mt-2">
+          This key is disabled and cannot be used for API requests. Delete it to create a new one.
         </p>
       )}
       {apiKey && (
@@ -400,37 +490,27 @@ export default function ApiKeys() {
           }
         />
 
-        <div
-          className={`mb-4 rounded-lg border border-border bg-card px-4 py-3 flex items-center justify-between gap-4 shadow-sm ${
-            !canToggleSmtp ? "opacity-60" : ""
-          }`}
-        >
+        <div className="mb-4 rounded-lg border border-border bg-card px-4 py-3 flex items-center justify-between gap-4 shadow-sm">
           <div className="min-w-0">
             <p className="text-sm font-medium">Use custom SMTP</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p
+              className={`text-xs mt-0.5 ${
+                !canToggleSmtp ? "text-muted-foreground/80" : "text-muted-foreground"
+              }`}
+            >
               {smtp
                 ? useCustomSMTP
-                  ? "Enabled — your SMTP is used first; platform SMTP is used if it fails."
-                  : "Disabled — your SMTP stays saved; sends use platform SMTP only."
+                  ? "Enabled. Your SMTP is used for sends. Platform SMTP is the fallback if it fails."
+                  : "Disabled. Your credentials stay saved, but sends use platform SMTP only."
                 : "Add SMTP credentials below to enable this option."}
             </p>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={useCustomSMTP}
+          <Switch
+            checked={useCustomSMTP}
             disabled={!canToggleSmtp || smtpToggleSaving}
-            onClick={toggleUseCustomSMTP}
-            className={`relative shrink-0 h-6 w-11 rounded-full transition-base disabled:cursor-not-allowed ${
-              useCustomSMTP ? "bg-primary" : "bg-muted"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-background shadow transition-transform ${
-                useCustomSMTP ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
-          </button>
+            onCheckedChange={(checked) => toggleUseCustomSMTP(checked)}
+            aria-label="Use custom SMTP"
+          />
         </div>
 
         {smtpLoading ? (

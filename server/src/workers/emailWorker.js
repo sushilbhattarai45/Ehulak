@@ -88,6 +88,19 @@ const worker = new Worker(
   },
 );
 
+const appendPlatformDisclaimer = ({ text, html, userEmail }) => {
+  const textFooter = `\n\n---\nDisclaimer: This email was sent through the Ehulak platform. Ehulak is not responsible for the content of this message. This email is associated with the account ${userEmail}.`;
+  const htmlFooter = `<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 12px;" /><p style="font-size:11px;color:#6b7280;line-height:1.5;margin:0;"><strong>Disclaimer:</strong> This email was sent through the Ehulak platform. Ehulak is not responsible for the content of this message. This email is associated with the account <a href="mailto:${userEmail}" style="color:#6b7280;">${userEmail}</a>.</p>`;
+
+  const baseText = text || "";
+  const baseHtml = html || (baseText ? `<p>${baseText.replace(/\n/g, "<br>")}</p>` : "");
+
+  return {
+    text: baseText + textFooter,
+    html: baseHtml + htmlFooter,
+  };
+};
+
 const getEmailFields = (emailData) => {
   const payload = emailData.emailData || emailData;
 
@@ -163,6 +176,13 @@ mailOptions.from = smtpDetails.from;
 }
 else
 {
+  const withDisclaimer = appendPlatformDisclaimer({
+    text: mailOptions.text,
+    html: mailOptions.html,
+    userEmail: user.email,
+  });
+  mailOptions.text = withDisclaimer.text;
+  mailOptions.html = withDisclaimer.html;
   await sgMail.send(mailOptions);
   console.log("Email sent successfully to:", JSON.stringify(mailOptions));
 }
@@ -173,8 +193,8 @@ else
       from: customSMTP ? smtpDetails.from : fields.from,
       to: fields.to,
       subject: fields.subject,
-      body: fields.body,
-      html: fields.html,
+      body: customSMTP ? fields.body : mailOptions.text,
+      html: customSMTP ? fields.html : mailOptions.html,
       campaign: fields.campaign,
       userId: fields.userId,
       messageId: fields.messageId,

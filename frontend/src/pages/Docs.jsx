@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, ArrowRight, UserPlus, KeyRound, Send, Server, Info } from "lucide-react";
+import { Mail, ArrowRight, UserPlus, KeyRound, Send, Server } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
 import PublicPageShell from "../components/PublicPageShell.jsx";
 import Sidebar from "../layout/Sidebar.jsx";
@@ -132,56 +132,77 @@ function DocsBody({ withPageHeader = false }) {
           <article className="space-y-12 pb-20">
             <Section id="smtp" title="SMTP">
               <div className="not-prose rounded-lg border border-primary/30 bg-primary/5 p-4 sm:p-5">
-                <div className="flex items-start gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <div className="h-9 w-9 shrink-0 rounded-md bg-primary/15 border border-primary/30 flex items-center justify-center">
                     <Server className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="min-w-0 flex-1 space-y-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-semibold text-foreground m-0">
-                        Sending via the platform SMTP
-                      </h3>
-                      <span className="inline-flex items-center text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30">
-                        DEFAULT
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Right now, every email you send through Ehulak goes out through our shared
-                      platform SMTP. Recipients will see the sender address as{" "}
-                      <code className="font-mono text-foreground bg-muted px-1 py-0.5 rounded text-[12px]">
-                        noreply@ehulak.tech
-                      </code>
-                      , regardless of the{" "}
-                      <code className="font-mono text-foreground bg-muted px-1 py-0.5 rounded text-[12px]">
-                        from
-                      </code>{" "}
-                      value you pass in the request body (that field is recorded against the
-                      message but not yet used as the envelope sender).
-                    </p>
-
-                    <div className="rounded-md border border-border bg-card/60 p-3 flex items-start gap-3">
-                      <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <div className="text-sm text-muted-foreground leading-relaxed">
-                        <div className="text-foreground font-medium mb-0.5">
-                          Custom SMTP — coming soon
-                        </div>
-                        <p className="m-0">
-                          We are working on a <strong>Custom SMTP</strong> feature so you can plug
-                          in your own SMTP host, port, and credentials, and send from a verified
-                          email address on your own domain. Until that ships, all sends use the
-                          default Ehulak SMTP shown above.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <span className="text-base font-semibold text-foreground shrink-0">
+                    How sending works
+                  </span>
+                  <span className="inline-flex h-5 items-center text-[10px] font-mono font-medium px-2 rounded bg-primary/15 text-primary border border-primary/30 shrink-0">
+                    PLATFORM SMTP
+                  </span>
                 </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-3 mb-0">
+                  By default, every email goes through Ehulak&apos;s shared mail server. Recipients
+                  see{" "}
+                  <code className="font-mono text-foreground bg-muted px-1 py-0.5 rounded text-[12px]">
+                    noreply@ehulak.tech
+                  </code>{" "}
+                  as the sender. No extra setup is required. Platform sends are limited to{" "}
+                  <strong className="text-foreground font-normal">5 per minute</strong> and{" "}
+                  <strong className="text-foreground font-normal">60 per hour</strong> per API key.
+                </p>
               </div>
+
+              <h3>Custom SMTP</h3>
+              <p>
+                To send from your own domain, open{" "}
+                <Link to="/api-keys" className="text-primary hover:underline font-medium">
+                  SMTPs &amp; API Keys
+                </Link>{" "}
+                and add your mail server details. One configuration is allowed per account.
+              </p>
+              <p>You will need to provide:</p>
+              <ul>
+                <li>
+                  <strong>Display name</strong>: a label for your configuration
+                </li>
+                <li>
+                  <strong>From address</strong>: the sender email shown to recipients
+                </li>
+                <li>
+                  <strong>Hostname</strong>: your SMTP host (for example{" "}
+                  <code>smtp.gmail.com</code>)
+                </li>
+                <li>
+                  <strong>Port</strong>: usually <code>587</code> or <code>465</code>
+                </li>
+                <li>
+                  <strong>Username</strong> and <strong>password</strong>: credentials from your
+                  mail provider
+                </li>
+              </ul>
+              <p>
+                After saving, turn on <strong>Use custom SMTP</strong> on the same page. Your from
+                address and server are used for sends. Turn it off anytime and your credentials stay
+                saved, but mail goes back through platform SMTP.
+              </p>
+              <p>
+                While custom SMTP is enabled, sends are limited to{" "}
+                <strong>20 emails per minute</strong> and <strong>200 per hour</strong> for now.
+                These limits will increase as we scale.
+              </p>
+              <p>
+                To update settings, edit your saved entry or delete it before adding a new one. If
+                custom SMTP fails during a send, Ehulak falls back to platform SMTP.
+              </p>
             </Section>
 
             <Section id="quick-start" title="Quick Start">
               <p>
                 New to Ehulak? Get your first email out the door in three steps. You can read these
-                without signing in—come back after each step to continue. The service is free to
+                without signing in. Come back after each step to continue. The service is free to
                 start and optimized for instant delivery.
               </p>
 
@@ -212,7 +233,7 @@ function DocsBody({ withPageHeader = false }) {
                 />
               </div>
 
-              <h3>Step 1 — Create an account</h3>
+              <h3>Step 1: Create an account</h3>
               <p>
                 Head to the{" "}
                 <Link to="/auth?mode=signup" className="text-primary hover:underline font-medium">
@@ -222,23 +243,26 @@ function DocsBody({ withPageHeader = false }) {
                 your dashboard once your account is ready.
               </p>
 
-              <h3>Step 2 — Create an API key</h3>
+              <h3>Step 2: Create an API key</h3>
               <p>
                 Once signed in, open{" "}
                 <Link to="/api-keys" className="text-primary hover:underline font-medium">
-                  API Keys
+                  SMTPs &amp; API Keys
                 </Link>{" "}
-                from the sidebar and create a new key. <strong>Copy it immediately</strong>—for
-                security, the full key is only shown once.
+                from the sidebar and create a key. <strong>Copy it immediately</strong> and store
+                it securely.
               </p>
               <p>Keep your key private:</p>
               <ul>
                 <li>Store it in a secrets manager or <code>.env</code> file.</li>
                 <li>Never commit it to a public repository.</li>
-                <li>Rotate it from the same page if you suspect it leaked.</li>
+                <li>
+                  If it leaked, <strong>delete</strong> the key and create a new one (see API Key
+                  section below).
+                </li>
               </ul>
 
-              <h3>Step 3 — Send your first email</h3>
+              <h3>Step 3: Send your first email</h3>
               <p>
                 Install <code>axios</code> in your project and call the send endpoint with your key
                 in the <code>x-api-key</code> header. The request body needs just a recipient and a
@@ -274,8 +298,9 @@ async function sendFirstEmail() {
 sendFirstEmail();`}</Code>
               <p>
                 That’s it. Open the dashboard to watch the email move through the pipeline and land
-                as a <strong>delivered</strong> event. If something fails five times in a row, it
-                will appear in the <strong>Dead Letter Queue</strong> for review.
+                as a <strong>delivered</strong> event. If delivery fails after{" "}
+                <strong>3 attempts</strong>, it will appear in the{" "}
+                <strong>Dead Letter Queue</strong> for review.
               </p>
             </Section>
 
@@ -290,7 +315,7 @@ sendFirstEmail();`}</Code>
                 <li>
                   Create an API key in the platform (see{" "}
                   <Link to="/api-keys" className="text-primary hover:underline font-medium">
-                    API Keys
+                    SMTPs &amp; API Keys
                   </Link>
                   ).
                 </li>
@@ -305,26 +330,46 @@ sendFirstEmail();`}</Code>
             <Section id="api-key" title="API Key">
               <p>
                 Every API request must include your personal API key. Keys are tied to your account
-                and should be kept private—do not commit them to public repositories.
+                and should be kept private. Do not commit them to public repositories.
               </p>
               <h3>How to get your key</h3>
               <ol className="list-decimal pl-5 space-y-2">
                 <li>
                   Sign in and open{" "}
                   <Link to="/api-keys" className="text-primary hover:underline font-medium">
-                    API Keys
+                    SMTPs &amp; API Keys
                   </Link>{" "}
                   in the sidebar.
                 </li>
                 <li>
-                  Create a new key and copy it immediately. You may not be able to view the full key
-                  again later.
+                  Create a key and copy it immediately. Only <strong>one API key</strong> is allowed
+                  per account.
                 </li>
                 <li>Store it in a secure place (password manager or secrets vault).</li>
               </ol>
               <p>
                 Use the key in the <code>x-api-key</code> header on every Send Email request (see
                 below).
+              </p>
+
+              <h3>Disable and delete</h3>
+              <p>
+                From the same page you can <strong>disable</strong> or <strong>delete</strong> your
+                key:
+              </p>
+              <ul>
+                <li>
+                  <strong>Disable</strong> stops the key from accepting API requests immediately.
+                  A disabled key <strong>cannot be re-enabled</strong>.
+                </li>
+                <li>
+                  <strong>Delete</strong> permanently removes the key from your account.
+                </li>
+              </ul>
+              <p>
+                To use a new key, you must <strong>delete</strong> the existing one first (whether
+                it is active or disabled), then create a fresh key. You cannot create a second key
+                while one still exists.
               </p>
             </Section>
 
@@ -358,7 +403,7 @@ Content-Type: application/json`}</Code>
 
                 <h4 className="text-sm font-semibold text-foreground">Success response</h4>
                 <Code lang="json">{`{
-  "message": "Email details for ID: fetched successfully!"
+  "message": "Email will be sent to recipient@example.com shortly!"
 }`}</Code>
 
                 <h4 className="text-sm font-semibold text-foreground">Example (axios)</h4>
@@ -404,22 +449,24 @@ export async function sendEmail({ to,  subject, body, html, text, campaign }) {
 }`}</Code>
 
                 <p className="text-xs text-muted-foreground">
-That's it. Open the dashboard to watch the email move through the pipeline and land as a <strong>delivered</strong> event. If something fails five times in a row, it will appear in the <strong>Dead Letter Queue</strong> for review.
+                  After a successful accept, track the message in the dashboard. If delivery fails
+                  after <strong>3 attempts</strong>, it moves to the{" "}
+                  <strong>Dead Letter Queue</strong>.
                 </p>
               </div>
 
               <h3>Errors</h3>
               <ul>
                 <li>
-                  <strong>401</strong> — Missing or invalid API key, or you hit a rate limit (see
-                  below). Confirm the key from{" "}
+                  <strong>401</strong>: missing, invalid, or <strong>disabled</strong> API key, or
+                  you hit a rate limit (see below). Confirm the key from{" "}
                   <Link to="/api-keys" className="text-primary hover:underline">
-                    API Keys
+                    SMTPs &amp; API Keys
                   </Link>{" "}
                   is correct and active.
                 </li>
                 <li>
-                  <strong>500</strong> — Something went wrong on our side. Retry after a short wait
+                  <strong>500</strong>: something went wrong on our side. Retry after a short wait
                   or contact support if it persists.
                 </li>
               </ul>
@@ -427,14 +474,27 @@ That's it. Open the dashboard to watch the email move through the pipeline and l
 
             <Section id="rate-limits" title="Rate Limits">
               <p>
-                To keep the platform healthy and prevent abuse, every API key is limited to a fixed
-                number of send requests over rolling time windows.
+                Send limits depend on whether you use platform SMTP or custom SMTP. All counters use
+                rolling time windows.
               </p>
 
+              <h3>Platform SMTP (default)</h3>
+              <p>These limits apply to API requests when custom SMTP is off:</p>
               <div className="grid sm:grid-cols-2 gap-3 not-prose">
                 <RateCard label="Per minute" value="5" sub="requests / minute" />
                 <RateCard label="Per hour" value="60" sub="requests / hour" />
               </div>
+
+              <h3>Custom SMTP</h3>
+              <p>When custom SMTP is enabled, higher send limits apply through your mail server:</p>
+              <div className="grid sm:grid-cols-2 gap-3 not-prose">
+                <RateCard label="Per minute" value="20" sub="emails / minute" />
+                <RateCard label="Per hour" value="200" sub="emails / hour" />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Custom SMTP limits will increase as we scale. Contact support if you need more
+                capacity in the meantime.
+              </p>
 
               <h3>What happens when you exceed a limit</h3>
               <p>
@@ -471,13 +531,14 @@ That's it. Open the dashboard to watch the email move through the pipeline and l
             <Section id="track-emails" title="Track Emails">
               <p>
                 You do not need extra API calls to monitor sends. Open <strong>Emails</strong> in
-                the sidebar to see a timeline of recent activity—successful deliveries and
-                failures—sorted with the newest first.
+                the sidebar to see a timeline of recent activity, including successful deliveries
+                and failures, sorted with the newest first.
               </p>
               <p>
-                Click any row to open full details for that message. You will see how it moved
-                through the pipeline (queue → processing → delivered), or where it failed if
-                retries were exhausted.
+                Click any row to open full details for that message. You will see the worker pickup
+                timeline, metadata, latest error (if any), and complete worker history. You can see
+                how it moved through the pipeline (queue, processing, delivered), or where it
+                failed if retries were exhausted.
               </p>
             </Section>
 
@@ -485,46 +546,44 @@ That's it. Open the dashboard to watch the email move through the pipeline and l
               <p>
                 Not every email delivers on the first try. When delivery keeps failing, Ehulak
                 retries automatically before moving the message to the{" "}
-                <strong>Dead Letter Queue (DLQ)</strong>—a safe holding area for emails that could
+                <strong>Dead Letter Queue (DLQ)</strong>, a safe holding area for emails that could
                 not be sent.
               </p>
 
               <h3>Retry policy</h3>
               <p>
-                Each send is attempted up to <strong>5 times</strong>. If all 5 attempts fail (for
+                Each send is attempted up to <strong>3 times</strong>. If all 3 attempts fail (for
                 example due to a temporary network issue or mailbox unavailable), the message is
                 removed from the active send pipeline and stored in the DLQ. You can review it
                 there instead of losing the record.
               </p>
               <Code lang="text">{`Send request accepted
-  → attempt 1 … fails → retry
-  → attempt 2 … fails → retry
-  → attempt 3 … fails → retry
-  → attempt 4 … fails → retry
-  → attempt 5 … fails → moved to DLQ`}</Code>
+  -> attempt 1 fails, retry
+  -> attempt 2 fails, retry
+  -> attempt 3 fails, moved to DLQ`}</Code>
 
               <h3>What is stored in the DLQ</h3>
               <p>
                 When a message lands in the DLQ, the platform keeps the information you need to
-                understand and act on the failure—without storing unnecessary copies of your API
+                understand and act on the failure, without storing unnecessary copies of your API
                 key or account secrets:
               </p>
               <ul>
                 <li>
-                  <strong>Recipient</strong> — who the email was sent to
+                  <strong>Recipient</strong>: who the email was sent to
                 </li>
                 <li>
-                  <strong>Sender</strong> — the from address used for that send
+                  <strong>Sender</strong>: the from address used for that send
                 </li>
                 <li>
-                  <strong>Subject</strong> — the campaign or message subject line
+                  <strong>Subject</strong>: the campaign or message subject line
                 </li>
                 <li>
-                  <strong>Failure reason</strong> — a short explanation of why the last attempt
+                  <strong>Failure reason</strong>: a short explanation of why the last attempt
                   failed
                 </li>
                 <li>
-                  <strong>Failed at</strong> — when the message was placed in the DLQ
+                  <strong>Failed at</strong>: when the message was placed in the DLQ
                 </li>
               </ul>
               <p>
@@ -542,16 +601,16 @@ That's it. Open the dashboard to watch the email move through the pipeline and l
                   in the sidebar.
                 </li>
                 <li>
-                  Browse failed messages—newest first—and read the failure reason for each row.
+                  Browse failed messages (newest first) and read the failure reason for each row.
                 </li>
                 <li>
-                  Use <strong>Retry</strong> on a row when you have fixed the underlying issue (for
-                  example corrected an address or restored your mail provider).
+                  Click any row to open the same detail view as dashboard emails: worker pickup
+                  timeline, metadata, and full worker history for that failed send.
                 </li>
               </ol>
               <p>
                 Successfully delivered emails appear under <strong>Emails</strong>; only messages
-                that exhausted all 5 retries appear in the DLQ.
+                that exhausted all <strong>3 attempts</strong> appear in the DLQ.
               </p>
             </Section>
           </article>

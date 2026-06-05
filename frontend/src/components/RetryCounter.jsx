@@ -1,6 +1,7 @@
 import { classNames } from "../lib/format.js";
+import { MAX_EMAIL_RETRIES } from "../lib/emails.js";
 
-export default function RetryCounter({ value, max = 5 }) {
+export default function RetryCounter({ value, max = MAX_EMAIL_RETRIES }) {
   const ratio = value / max;
   const color =
     value === 0

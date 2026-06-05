@@ -11,6 +11,12 @@ export const createAPIKey = async (req, res) => {
     const userId = req.user.userId;
     console.log("Creating API key for user ID:", userId);
 
+
+    const existingApiKey = await ApiKeyModel.findOne({ userId });
+    if (existingApiKey) {
+      return res.status(400).json({ success: false, message: "API key already exists" });
+    }
+    console.log('existingApiKey:', JSON.stringify(existingApiKey));
     const apiKeyValue = generateUniqueApiKey();
     const keyHash = crypto
       .createHash("sha256")
@@ -101,12 +107,12 @@ export const deleteAPIKey = async (req, res) => {
   try {
     const userId = req.user.userId;
     const apiKeyValue = req.body.apiKeyValue;
-    await redisConfig.del(`apiKey:${apiKeyValue}`);
-    await redisConfig.del(`userApiKey:${userId}`);
-
-    let deleteApiKey = await ApiKeyModel.findOne({ apiKeyValue });
+  
+    let deleteApiKey = await ApiKeyModel.findOne({ apiKeyValue, userId });
     if (deleteApiKey) {
       await deleteApiKey.deleteOne();
+      await redisConfig.del(`apiKey:${apiKeyValue}`);
+      await redisConfig.del(`userApiKey:${userId}`);
     }
     res.json({ success: true, message: "API key deleted successfully" });
   } catch (error) {
@@ -119,14 +125,18 @@ export const disableAPIKey = async (req, res) => {
   try {
     const userId = req.user.userId;
     const apiKeyValue = req.body.apiKeyValue;
-    await redisConfig.set(`apiKey:${apiKeyValue}`, JSON.stringify({
-      isActive: false,
-    }));
-    let disableApiKey = await ApiKeyModel.findOne({ apiKeyValue });
-      if (disableApiKey) {
-        disableApiKey.isActive = false;
-          await disableApiKey.save();
-      }
+
+    let disableApiKey = await ApiKeyModel.findOne({ apiKeyValue, userId });
+    if (disableApiKey) {
+      disableApiKey.isActive = false;
+        await disableApiKey.save();
+        await redisConfig.set(`apiKey:${apiKeyValue}`, JSON.stringify({
+          isActive: false,
+        }));
+        await redisConfig.set(`userApiKey:${userId}`, JSON.stringify({
+          isActive: false,
+        }));
+    }    
     res.json({ success: true, message: "API key disabled successfully" });
   } catch (error) {
     console.error("Error disabling API key:", error);

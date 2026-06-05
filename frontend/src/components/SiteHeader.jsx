@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import LogoMark from "./LogoMark.jsx";
 import { classNames } from "../lib/format.js";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const navLink =
   "h-9 px-4 inline-flex items-center rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-base";
@@ -11,6 +12,8 @@ const navLinkPrimary =
   "h-9 px-4 inline-flex items-center gap-2 rounded-md bg-primary text-sm font-medium text-primary-foreground hover:opacity-90 transition-base";
 
 function HeaderActions({ variant }) {
+  const { user } = useAuth();
+
   switch (variant) {
     case "landing":
       return (
@@ -18,9 +21,16 @@ function HeaderActions({ variant }) {
           <Link to="/docs" className={navLink}>
             Docs
           </Link>
-          <Link to="/auth" className={navLinkBordered}>
-            Sign in
-          </Link>
+          {user ? (
+            <Link to="/dashboard" className={navLinkPrimary}>
+              Dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <Link to="/auth" className={navLinkBordered}>
+              Sign in
+            </Link>
+          )}
         </div>
       );
     case "auth":

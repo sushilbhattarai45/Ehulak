@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
 import DataTable from "../components/DataTable.jsx";
@@ -6,7 +7,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { maskEmail, relativeTime, absoluteTime } from "../lib/format.js";
 
 export default function DLQ() {
-  const [retried, setRetried] = useState({});
+  const navigate = useNavigate();
   const { dlqEmails, getDLQEmails } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const dlq = dlqEmails.emails || [];
@@ -74,7 +75,7 @@ export default function DLQ() {
     <div>
       <PageHeader
         title="Dead Letter Queue"
-        description="Emails that exhausted their retry budget. Inspect the failure reason and manually requeue if appropriate."
+        description="Emails that exhausted their retry budget. Click any row to inspect its worker history and failure details."
         actions={
           <button
             className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-border text-sm hover:bg-accent transition-base"
@@ -91,7 +92,12 @@ export default function DLQ() {
           </button>
         }
       />
-      <DataTable columns={columns} rows={dlq} empty="DLQ is empty — nice." />
+      <DataTable
+        columns={columns}
+        rows={dlq}
+        onRowClick={(r) => navigate(`/emails/${r.id || r._id}`)}
+        empty="DLQ is empty — nice."
+      />
 
       <div className="flex justify-center items-center gap-2 mt-4">
         <button
