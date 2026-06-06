@@ -10,6 +10,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
         .json({ success: false, message: "API key missing" });
     }
 
+
     const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
     const hourlyKey = `emailCount:${keyHash}`;
     const minuteKey = `emailCountPerMinute:${keyHash}`;
@@ -32,7 +33,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
       });
     }
 
-    if (minuteCount > 5) {
+    if (minuteCount > 10) {
       return res.status(403).json({
         success: false,
         message: "You have reached the maximum number of emails per minute.",

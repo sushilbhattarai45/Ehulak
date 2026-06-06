@@ -4,7 +4,10 @@ import { OAuth2Client } from "google-auth-library";
 import User from "../models/userModel.js";
 import ApiKeyModel from "../models/apiKeyModel.js";
 import redisConfig from "../config/redisConfig.js";
-
+import {
+  isDisposableEmail,
+  isDisposableEmailDomain,
+} from 'disposable-email-domains-js';
 import bcrypt from "bcrypt";
 import { producer } from "../kafka/producer.js";
 
@@ -138,11 +141,29 @@ export const refreshToken = (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+if(!email || !password)
+{
+  return res.status(400).json({
+    success: false,
+    message: "Email and password are required",
+  });
+}
 
+    let emailDomain = email.split("@")[1];
+
+    if (emailDomain !="gmail.com")
+    {
+      return res.status(400).json({
+        success: false,
+        message: "Only Gmail accounts are allowed to prevent abuse.",
+      });
+    }
     // 1. Check Redis cache first
     let cachedUser = await redisConfig.get(`user:${email}`);
     let user;
     console.log("Login attempt for email:", email);
+
+
 
     console.log("Checking Redis cache for user:", cachedUser);
     if (cachedUser) {
@@ -160,6 +181,9 @@ export const login = async (req, res) => {
         });
       }
 
+
+
+      
       // 3. Cache user
       await redisConfig.set(`user:${email}`, JSON.stringify(user), "EX", 3600);
     }
@@ -244,6 +268,17 @@ export const registerUser = async (req, res) => {
         message: "Password is required for local accounts",
       });
     }
+   
+    let emailDomain = email.split("@")[1];
+
+    if (emailDomain !="gmail.com")
+    {
+      return res.status(400).json({
+        success: false,
+        message: "Only Gmail accounts are allowed to prevent abuse.",
+      });
+    }
+
 
     // 3. Check DB first (source of truth)
     //check redis
@@ -468,6 +503,16 @@ export const createOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
+      let emailDomain = email.split("@")[1];
+
+      if (emailDomain !="gmail.com")
+      {
+        return res.status(400).json({
+          success: false,
+          message: "Only Gmail accounts are allowed to prevent abuse.",
+        });
+      }
+
     console.log("Creating OTP for email:", email);
     //generate a 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000);
@@ -480,6 +525,7 @@ await producer({
   type: "email",
   action: "sendEmail",
   emailData: {
+    type:"internal",
     from: "noreply@ehulak.tech",
     to: email,
     campaign: "OTP for login",

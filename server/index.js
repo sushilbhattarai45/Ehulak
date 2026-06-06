@@ -13,7 +13,11 @@ import cookieParser from "cookie-parser";
 dotenv.config();
 const app = express();
 app.use(cors({
-  origin: "https://ehulak.tech",
+  origin: [
+    "https://ehulak.tech",
+    "http://localhost:5173",
+    "http://localhost:4173"
+  ],
 
   credentials: true,
 }));

@@ -3,10 +3,11 @@ import smtpModel from "../models/smtpModel.js";
 import redisConfig from "../config/redisConfig.js";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import { deleteTransporter }
-from "../utils/transporterCache.js";
+// import { deleteTransporter }
+// from "../utils/transporterCache.js";
 import { z, ZodError } from "zod";
 import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
+import { producer } from "../kafka/producer.js";
 
 
 const schema = z.object({
@@ -238,10 +239,17 @@ export const updateSMTP = async (req, res) => {
           message: "SMTP not found",
         });
       }
+
+      const updatedSMTP = await smtpModel.updateOne({ smtpId }, { isDisabled: true });
       
       await smtpModel.deleteOne({ smtpId });
       await redisConfig.del(`smtp:${smtpId}`);
-      deleteTransporter(smtp.userId);
+
+     await redisConfig.set(`disabledSMTPs:${smtpId}`, JSON.stringify({
+      smtpId: smtpId,
+      disabledAt: new Date(),
+     }));
+     
       return res.status(200).json({
       success: true,
       message: "SMTP deleted successfully",

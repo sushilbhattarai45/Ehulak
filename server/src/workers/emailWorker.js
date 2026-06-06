@@ -12,7 +12,6 @@ import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
 import dotenv from "dotenv";
 dotenv.config();
 import sgMail from '@sendgrid/mail';
-import { getTransporter } from "../utils/transporterCache.js";
 import connectDb from "../db/connectDb.js";
 
 (
@@ -26,19 +25,67 @@ import connectDb from "../db/connectDb.js";
   }
 )();
 
-// (async () => {
+const transportCache = new Map();
+ const getTransporter = async (smtpDetails) => {
+  const cacheKey = smtpDetails.smtpId;
 
-//   console.log("SMTP_HOST:", process.env.SMTP_HOST);
-//   console.log("SMTP_PORT:", process.env.SMTP_PORT);
-//   console.log("SMTP_USER:", process.env.SMTP_USER);
-//   console.log("SMTP_PASSWORD:", process.env.SMTP_PASSWORD);
-//   try {
-//     await transporter.verify();
-//     console.log(" Email transporter is ready");
-//   } catch (err) {
-//     console.error(" Transporter verification failed:", err);
-//   }
-// })();
+
+  const disabledSMTP = await redisConfig.exists(`disabledSMTPs:${cacheKey}`);
+
+  if (disabledSMTP) {
+    console.log("SMTP is disabled");
+    throw new Error("SMTP is disabled");
+  }
+
+  if (transportCache.has(cacheKey)) {
+    transportCache.get(cacheKey).lastUsed = new Date();
+    return transportCache.get(cacheKey).transporter;
+  }
+
+
+  console.log("creating new transporter");
+
+  const transporter = nodemailer.createTransport({
+    host: smtpDetails.host,
+    port: smtpDetails.port,
+    secure: smtpDetails.port === 465,
+    auth: {
+      user: smtpDetails.username,
+      pass: smtpDetails.password,
+    },
+    pool: true,
+    maxConnections: 5,
+    maxMessages: 100,
+  });
+
+  transportCache.set(cacheKey, {
+    transporter,
+    lastUsed: new Date(),
+  });
+
+  //list all keys in transportCache
+
+  console.log(`Created SMTP transporter for ${cacheKey}`);
+
+  return transporter;
+};
+
+ const clearTransportCache = () => {
+
+for (const key of transportCache.keys()) {
+const transporter = transportCache.get(key);
+console.log('transporter:', transporter.lastUsed);
+if(Date.now() - transporter.lastUsed > 1000*60*5)//5 minutes
+  {
+    transporter.transporter.close();
+    transportCache.delete(key);
+    console.log(`Deleted expired SMTP transporter for ${key}`);
+  }
+  }
+
+};
+
+
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
@@ -114,6 +161,7 @@ const getEmailFields = (emailData) => {
     html: payload.html,
     userId: payload.userId,
     campaign: payload.campaign,
+    type: payload?.type,
     messageId: payload.messageId,
   };
 };
@@ -138,6 +186,12 @@ try{
 // check if user is using custom SMTP
 
 console.log('user id:', fields.userId);
+
+if(fields.type === "internal"){
+  await sgMail.send(mailOptions);
+  console.log("Email sent successfully to:", JSON.stringify(mailOptions));
+  return true;
+}
 const user = await userModel.findOne({ userId: fields.userId });
 console.log('user:', JSON.stringify(user));
 
@@ -161,21 +215,23 @@ if (user.useCustomSMTP) {
     userId: fields.userId,
     host: decrypt(smtp.hostname),
     from: smtp.from,
+    smtpId: smtp.smtpId,
     port: smtp.port,
     username: decrypt(smtp.username),
     password: decrypt(smtp.password),
   };
   console.log('smtpDetails:', JSON.stringify(smtpDetails));
 
-  const transporter = getTransporter(smtpDetails);
+  const transporter = await getTransporter(smtpDetails);
 mailOptions.from = smtpDetails.from;
   await transporter.sendMail(mailOptions);
     console.log("Email sent successfully");
     return true;
 
 }
-else
-{
+
+else{
+
   const withDisclaimer = appendPlatformDisclaimer({
     text: mailOptions.text,
     html: mailOptions.html,
@@ -236,3 +292,8 @@ worker.on("failed", (job, err) => {
     console.warn("Retrying job", err.message);
   }
 });
+
+setInterval(() => {
+  clearTransportCache();
+  console.log('transportCache cleared');
+}, 1000*60); // 1 minute

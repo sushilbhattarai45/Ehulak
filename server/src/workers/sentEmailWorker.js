@@ -97,4 +97,4 @@ catch(err){
 setInterval(() => {
   console.log("Running scheduled flush of sent emails...");
   flushBatch();
-}, 10000); // 10000 ms = 10 seconds
+}, 5000); // 5000 ms = 5 seconds

@@ -12,7 +12,6 @@ async function consumer() {
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
      console.log(`RReceived message from Kafka topic '${topic}'`);
-
      console.log(`Message content: ${message.value.toString()}`);
       const parsed = JSON.parse(message.value.toString());
       const emailPayload = parsed.emailData || parsed;
