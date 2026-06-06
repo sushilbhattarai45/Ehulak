@@ -30,8 +30,6 @@ export async function processEmail(req, res) {
   try {
     const validatedData = schema.parse(req.body);
     const { to, subject, body, html, campaign } = validatedData;
-
-
     console.log("Received email processing request with body:");
     const data = {
       to: to,

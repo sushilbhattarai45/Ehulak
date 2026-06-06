@@ -56,7 +56,7 @@ export const emailMiddleware = async (req, res, next) => {
   //     .status(403)
   //     .json({ success: false, message: "You have reached the maximum number of emails per account" });
   //  }
-  //   next();
+     next();
   } catch (error) {
     console.error("Error in emailMiddleware:", error);
     return res

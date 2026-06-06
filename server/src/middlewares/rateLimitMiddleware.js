@@ -39,6 +39,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
         message: "You have reached the maximum number of emails per minute.",
       });
     }
+    console.log("RATE LIMIT MIDDLEWARE: Passed");
 
     next();
   } catch (error) {
