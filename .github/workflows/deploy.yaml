@@ -46,9 +46,9 @@ jobs:
             cd Ehulak
             git pull
             cd server
-            docker compose down
-            docker compose build --no-cache
-            docker compose up -d
+            docker-compose down
+            docker-compose build --no-cache
+            docker-compose up -d
   
   test:
     runs-on: ubuntu-latest
