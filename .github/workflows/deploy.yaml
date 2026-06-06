@@ -15,9 +15,9 @@ jobs:
       - name: deploying the whole app
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{secrets.HOST_DO}}
+          host: ${{secrets.OVH_HOST}}
           username: root
-          key: ${{secrets.SSH_KEY_DO}}
+          key: ${{secrets.OVH_SECRET}}
           script: |
             source ~/.nvm/nvm.sh
             cd Ehulak
@@ -37,9 +37,9 @@ jobs:
       - name: deploying the server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{secrets.HOST_DO}}
+          host: ${{secrets.OVH_HOST}}
           username: root
-          key: ${{secrets.SSH_KEY_DO}}
+          key: ${{secrets.OVH_SECRET}}
 
           script: |
             source ~/.nvm/nvm.sh
@@ -57,9 +57,9 @@ jobs:
       - name: Checking health
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{secrets.HOST_DO}}
+          host: ${{secrets.OVH_HOST}}
           username: root
-          key: ${{secrets.SSH_KEY_DO}}
+          key: ${{secrets.OVH_SECRET}}
           run: |
             curl -f http://127.0.0.1:3002 || exit 1
         
