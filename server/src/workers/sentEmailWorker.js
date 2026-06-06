@@ -23,7 +23,6 @@ dotenv.config();
               from: job.data.from,
               to: job.data.to,
               campaign: job.data.campaign,
-              html: job.data.html,
               subject: job.data.subject,
               userId: job.data.userId,
               messageId: job.data.messageId,
