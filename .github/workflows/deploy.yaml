@@ -16,7 +16,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{secrets.OVH_HOST}}
-          username: root
+          username: ubuntu
           key: ${{secrets.OVH_SECRET}}
           script: |
             source ~/.nvm/nvm.sh
@@ -38,7 +38,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{secrets.OVH_HOST}}
-          username: root
+          username: ubuntu
           key: ${{secrets.OVH_SECRET}}
 
           script: |
@@ -58,7 +58,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{secrets.OVH_HOST}}
-          username: root
+          username: ubuntu
           key: ${{secrets.OVH_SECRET}}
           run: |
             curl -f http://127.0.0.1:3002 || exit 1
