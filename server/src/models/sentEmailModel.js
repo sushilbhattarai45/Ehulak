@@ -20,7 +20,7 @@ const sentEmailSchema = new mongoose.Schema({
   to: { type: String, required: true },
   subject: { type: String, required: true },
   userId: { type: String, required: true },
-  body: { type: String, required: true },
+  body: { type: String, required: false },
   messageId: { type: String },
   campaign: { type: String, required: true },
   html: { type: String, required: false },
