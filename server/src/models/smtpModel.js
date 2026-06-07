@@ -12,6 +12,8 @@ const smtpSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
+  isWorking: { type: Boolean, default: false },
+  lastUsedAt: { type: Date, default: null },
 });
 
 const smtpModel = mongoose.model("smtp", smtpSchema);

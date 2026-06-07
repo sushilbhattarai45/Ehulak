@@ -8,6 +8,34 @@ import dotenv from "dotenv";
 import { z, ZodError } from "zod";
 import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
 import { producer } from "../kafka/producer.js";
+import nodemailer from "nodemailer";
+
+
+const testSMTP = async (data) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: data.hostname,
+      port: data.port,
+      auth: {
+        user: data.username,
+        pass: data.password,
+      },
+    });
+    const info = await transporter.sendMail({
+      from: data.from,
+      to: data.to,
+      subject: data.subject,
+      text: data.text,
+    });
+console.log(info);
+return true;
+
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
 
 
 const schema = z.object({
@@ -42,11 +70,11 @@ export const createSMTP = async (req, res) => {
     const { hostname, port, username, password, name, from } = validatedData;
       //demo json
     //   const demoJson = {
-    //     hostname: "smtp.gmail.com",
-    //     port: 587,
-    //     username: "your_username",
-    //     password: "your_password",
-    //     name: "Your Name",
+        // hostname: "smtp.gmail.com",
+        // port: 587,
+        // username: "your_username",
+        // password: "your_password",
+        // name: "Your Name",
     //   };
 
     const userId = req.user.userId;
@@ -61,6 +89,25 @@ export const createSMTP = async (req, res) => {
         message: "SMTP already exists",
       });
     }
+
+const isSMTPWorking = await testSMTP({
+  hostname,
+  port,
+  username,
+  password,
+  from,
+  to: "bhattaraisushil005@gmail.com",
+  subject: "Integration Testing for SMTP",
+  text: "This is an integration testing for userId: " + userId,
+});
+
+
+if(!isSMTPWorking) {
+  return res.status(400).json({
+    success: false,
+    message: "SMTP is not working",
+  });
+}
 
     const smtpId = crypto.randomUUID()+Date.now();
 
@@ -191,7 +238,25 @@ export const updateSMTP = async (req, res) => {
           message: "SMTP not found",
         });
       }
-  
+
+      const isSMTPWorking = await testSMTP({
+        hostname,
+        port,
+        username,
+        password,
+        from,
+        to: "bhattaraisushil005@gmail.com",
+        subject: "Integration Testing for SMTP",
+        text: "This is an integration testing for userId: " + smtp.userId,
+      });
+
+      if(!isSMTPWorking) {
+        return res.status(400).json({
+          success: false,
+          message: "SMTP is not working. Please check the credentials and try again.",
+        });
+      }
+
       await smtpModel.updateOne(
         { smtpId },
         {
