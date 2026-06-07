@@ -120,6 +120,8 @@ if(!isSMTPWorking) {
       password: encrypt(password),
       name,
       from,
+      isWorking: true,
+      lastUsedAt: new Date(),
     });
 
     console.log("SMTP created successfully", newSmtp);
@@ -266,6 +268,8 @@ export const updateSMTP = async (req, res) => {
           password: encrypt(password),
           name,
           from,
+          isWorking: true,
+          lastUsedAt: new Date(),
         }
       );
       deleteTransporter(smtp.userId);
