@@ -12,6 +12,7 @@ import { classNames } from "../lib/format.js";
 const SMTP_SAVE_SUCCESS_MSG = "SMTP Validation and Integration successful";
 const SMTP_SAVE_ERROR_MSG =
   "SMTP Integration and Validation failed. Please try again";
+const SMTP_REQUEST_TIMEOUT_MS = 60000;
 
 const inputClass =
   "mt-1 w-full h-9 px-3 rounded-md bg-input/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring/40 transition-base";
@@ -332,30 +333,32 @@ export default function ApiKeys() {
       return;
     }
 
+    const isEdit = smtpFormMode === "edit" && Boolean(smtp?.smtpId);
+    const requestConfig = {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      timeout: SMTP_REQUEST_TIMEOUT_MS,
+    };
+
     setSmtpSaving(true);
     setSmtpSaveStatus("loading");
     setSmtpSaveProgress(12);
     try {
-      if (smtpFormMode === "edit" && smtp?.smtpId) {
+      if (isEdit) {
         await axiosInstance.put(
           "/smtp/update",
           { smtpId: smtp.smtpId, ...payload },
-          { headers: { Authorization: `Bearer ${accessToken}` } },
+          requestConfig,
         );
       } else {
-        await axiosInstance.post(
-          "/smtp/create",
-          payload,
-          { headers: { Authorization: `Bearer ${accessToken}` } },
-        );
+        await axiosInstance.post("/smtp/create", payload, requestConfig);
       }
       setSmtpSaveProgress(100);
       setSmtpSaveStatus("success");
       toast.success(SMTP_SAVE_SUCCESS_MSG);
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      await new Promise((resolve) => setTimeout(resolve, 900));
       setSmtpForm(emptySmtpForm);
-      resetSmtpSaveFeedback();
       await loadSmtp();
+      resetSmtpSaveFeedback();
     } catch (e) {
       setSmtpSaveProgress(0);
       setSmtpSaveStatus("error");
@@ -591,7 +594,9 @@ export default function ApiKeys() {
                   )}
                 >
                   {smtpSaveStatus === "loading" &&
-                    "Validating SMTP credentials and testing integration..."}
+                    (smtpFormMode === "edit"
+                      ? "Updating SMTP settings and validating integration..."
+                      : "Validating SMTP credentials and testing integration...")}
                   {smtpSaveStatus === "success" && SMTP_SAVE_SUCCESS_MSG}
                   {smtpSaveStatus === "error" && SMTP_SAVE_ERROR_MSG}
                 </p>
@@ -605,7 +610,9 @@ export default function ApiKeys() {
                 className="inline-flex items-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base disabled:opacity-50"
               >
                 {smtpSaving
-                  ? "Validating..."
+                  ? smtpFormMode === "edit"
+                    ? "Updating..."
+                    : "Validating..."
                   : smtpFormMode === "edit"
                     ? "Update SMTP"
                     : "Save SMTP"}
