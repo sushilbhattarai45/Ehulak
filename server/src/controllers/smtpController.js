@@ -259,6 +259,21 @@ export const updateSMTP = async (req, res) => {
         });
       }
 
+      console.log("SMTP is working");
+      console.log(
+      {
+        hostname: (hostname),
+        port: port,
+        username: (username),
+        password: (password),
+        name,
+        from,
+        isWorking: true,
+        lastUsedAt: new Date(),
+      }
+      )
+
+      
       await smtpModel.updateOne(
         { smtpId },
         {
@@ -268,6 +283,7 @@ export const updateSMTP = async (req, res) => {
           password: encrypt(password),
           name,
           from,
+          isActive: true,
           isWorking: true,
           lastUsedAt: new Date(),
         }
