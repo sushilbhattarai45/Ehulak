@@ -288,7 +288,6 @@ export const updateSMTP = async (req, res) => {
           lastUsedAt: new Date(),
         }
       );
-      deleteTransporter(smtp.userId);
       await redisConfig.del(`smtp:${smtpId}`);
       await redisConfig.set(`smtp:${smtpId}`, JSON.stringify(smtp));
   
