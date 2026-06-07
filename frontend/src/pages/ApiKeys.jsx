@@ -344,7 +344,7 @@ export default function ApiKeys() {
     setSmtpSaveProgress(12);
     try {
       if (isEdit) {
-        await axiosInstance.put(
+        await axiosInstance.post(
           "/smtp/update",
           { smtpId: smtp.smtpId, ...payload },
           requestConfig,
