@@ -6,7 +6,7 @@ const router = Router();
 router.post("/create", createSMTP);
 router.post("/decrypt", decryptSMTP);
 router.get("/get", getSMTP);
-router.put("/update", updateSMTP);
+router.post("/update", updateSMTP);
 router.get("/getUserSMTPs", getUserSMTPs);
 router.post("/delete", deleteSMTP);
 

@@ -172,7 +172,7 @@ const sendEmail = async (jobData, workerHistory) => {
   console.log("Sending email to:", JSON.stringify(fields));
 
   const mailOptions = {
-    from: 'hi@ehulak.tech',
+    from: fields.from,
     to: fields.to,
     subject: fields.subject,
     text: fields.text,
