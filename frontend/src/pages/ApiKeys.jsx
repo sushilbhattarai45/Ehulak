@@ -5,7 +5,13 @@ import axiosInstance from "../components/api/axiosInstance.js";
 import { Plus, Copy, Eye, EyeOff, Trash2, Pencil, Ban } from "lucide-react";
 import PageHeader from "../components/PageHeader.jsx";
 import { Switch } from "../components/ui/switch.tsx";
+import { Progress } from "../components/ui/progress.tsx";
 import { toast } from "sonner";
+import { classNames } from "../lib/format.js";
+
+const SMTP_SAVE_SUCCESS_MSG = "SMTP Validation and Integration successful";
+const SMTP_SAVE_ERROR_MSG =
+  "SMTP Integration and Validation failed. Please try again";
 
 const inputClass =
   "mt-1 w-full h-9 px-3 rounded-md bg-input/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring/40 transition-base";
@@ -131,6 +137,8 @@ export default function ApiKeys() {
   /** null = view or empty, "add" | "edit" = form */
   const [smtpFormMode, setSmtpFormMode] = useState(null);
   const [smtpSaving, setSmtpSaving] = useState(false);
+  const [smtpSaveStatus, setSmtpSaveStatus] = useState(null);
+  const [smtpSaveProgress, setSmtpSaveProgress] = useState(0);
   const [smtpToggleSaving, setSmtpToggleSaving] = useState(false);
   const canToggleSmtp = Boolean(smtp) || useCustomSMTP;
 
@@ -180,6 +188,20 @@ export default function ApiKeys() {
   useEffect(() => {
     setApiKeyDisabled(isApiKeyDisabled());
   }, [apiKey, user?.userId]);
+
+  useEffect(() => {
+    if (!smtpSaving) return undefined;
+
+    setSmtpSaveProgress(12);
+    const intervalId = setInterval(() => {
+      setSmtpSaveProgress((current) => {
+        if (current >= 88) return current;
+        return current + 4 + Math.random() * 5;
+      });
+    }, 350);
+
+    return () => clearInterval(intervalId);
+  }, [smtpSaving]);
 
   const handleCopy = () => {
     if (apiKey) {
@@ -270,13 +292,20 @@ export default function ApiKeys() {
     };
   };
 
+  const resetSmtpSaveFeedback = () => {
+    setSmtpSaveStatus(null);
+    setSmtpSaveProgress(0);
+  };
+
   const startAddSmtp = () => {
     setSmtpForm(emptySmtpForm);
     setSmtpFormMode("add");
+    resetSmtpSaveFeedback();
   };
 
   const startEditSmtp = () => {
     if (!smtp) return;
+    resetSmtpSaveFeedback();
     setSmtpForm({
       hostname: smtp.hostname || "",
       port: String(smtp.port ?? ""),
@@ -291,6 +320,7 @@ export default function ApiKeys() {
   const cancelSmtpForm = () => {
     setSmtpForm(emptySmtpForm);
     setSmtpFormMode(null);
+    resetSmtpSaveFeedback();
   };
 
   const saveSmtp = async () => {
@@ -303,6 +333,8 @@ export default function ApiKeys() {
     }
 
     setSmtpSaving(true);
+    setSmtpSaveStatus("loading");
+    setSmtpSaveProgress(12);
     try {
       if (smtpFormMode === "edit" && smtp?.smtpId) {
         await axiosInstance.put(
@@ -310,19 +342,24 @@ export default function ApiKeys() {
           { smtpId: smtp.smtpId, ...payload },
           { headers: { Authorization: `Bearer ${accessToken}` } },
         );
-        toast.success("SMTP updated");
       } else {
         await axiosInstance.post(
           "/smtp/create",
           payload,
           { headers: { Authorization: `Bearer ${accessToken}` } },
         );
-        toast.success("SMTP saved");
       }
+      setSmtpSaveProgress(100);
+      setSmtpSaveStatus("success");
+      toast.success(SMTP_SAVE_SUCCESS_MSG);
+      await new Promise((resolve) => setTimeout(resolve, 700));
       setSmtpForm(emptySmtpForm);
+      resetSmtpSaveFeedback();
       await loadSmtp();
     } catch (e) {
-      toast.error(e?.response?.data?.message || "Failed to save SMTP");
+      setSmtpSaveProgress(0);
+      setSmtpSaveStatus("error");
+      toast.error(SMTP_SAVE_ERROR_MSG);
     } finally {
       setSmtpSaving(false);
     }
@@ -526,6 +563,40 @@ export default function ApiKeys() {
                 Re-enter your password to save changes (it is not shown after saving).
               </p>
             )}
+            {smtpSaveStatus && (
+              <div
+                className={classNames(
+                  "mt-4 rounded-md border px-3 py-3 space-y-2",
+                  smtpSaveStatus === "success" &&
+                    "border-primary/30 bg-primary/5",
+                  smtpSaveStatus === "error" &&
+                    "border-destructive/30 bg-destructive/5",
+                  smtpSaveStatus === "loading" && "border-border bg-muted/30",
+                )}
+              >
+                <Progress
+                  value={smtpSaveProgress}
+                  className={classNames(
+                    "h-1.5",
+                    smtpSaveStatus === "success" && "[&>div]:bg-primary",
+                    smtpSaveStatus === "error" && "bg-destructive/20 [&>div]:bg-destructive",
+                  )}
+                />
+                <p
+                  className={classNames(
+                    "text-xs",
+                    smtpSaveStatus === "success" && "text-primary",
+                    smtpSaveStatus === "error" && "text-destructive",
+                    smtpSaveStatus === "loading" && "text-muted-foreground",
+                  )}
+                >
+                  {smtpSaveStatus === "loading" &&
+                    "Validating SMTP credentials and testing integration..."}
+                  {smtpSaveStatus === "success" && SMTP_SAVE_SUCCESS_MSG}
+                  {smtpSaveStatus === "error" && SMTP_SAVE_ERROR_MSG}
+                </p>
+              </div>
+            )}
             <div className="flex flex-wrap gap-2 mt-5">
               <button
                 type="button"
@@ -533,7 +604,11 @@ export default function ApiKeys() {
                 disabled={smtpSaving}
                 className="inline-flex items-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-base disabled:opacity-50"
               >
-                {smtpFormMode === "edit" ? "Update SMTP" : "Save SMTP"}
+                {smtpSaving
+                  ? "Validating..."
+                  : smtpFormMode === "edit"
+                    ? "Update SMTP"
+                    : "Save SMTP"}
               </button>
               <button
                 type="button"
