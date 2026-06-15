@@ -12,14 +12,12 @@ import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
-app.use(cors({
-  origin: [
-    "https://ehulak.tech",
-    "http://localhost:5173",
-    "http://localhost:4173"
-  ],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 
 app.use(express.json());
@@ -33,6 +31,10 @@ app.listen(PORT, () => {
 });
 app.get("/", (req, res) => {
   res.send("Welcome to the Ehulak API. This is the latest version.");
+});
+app.use((req, res, next) => {
+  console.log("🔥", req.method, req.url);
+  next();
 });
 
 app.use("/email", emailRouter);
