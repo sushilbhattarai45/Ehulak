@@ -14,7 +14,7 @@ dotenv.config();
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://www.ehulak.tech"],
+    origin: ["http://localhost:5173", "https://ehulak.tech"],
     credentials: true,
   }),
 );
@@ -30,7 +30,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 app.get("/", (req, res) => {
-  res.send("Welcome to the Ehulak API. This is the latest version.");
+  res.send("Welcome to the Ehulak API. This is the latest version 3.0.0");
 });
 app.use((req, res, next) => {
   console.log("🔥", req.method, req.url);
