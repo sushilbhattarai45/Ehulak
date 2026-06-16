@@ -14,7 +14,8 @@ dotenv.config();
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://www.ehulak.tech"],
+    origin: ["http://localhost:5173", "https://www.ehulak.tech"],
+    credentials: true,
   }),
 );
 app.use(cookieParser());
