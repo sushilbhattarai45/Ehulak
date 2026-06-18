@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await axiosInstance.get(`/creds/getApiKeyForUser`, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,  
         },
       });
 
