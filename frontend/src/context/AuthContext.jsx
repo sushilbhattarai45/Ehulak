@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : null;
-  });
+  });  
   const [apiKey, setApiKey] = useState(() => {
     const stored = localStorage.getItem("apiKey");
     return stored ? stored : null;
