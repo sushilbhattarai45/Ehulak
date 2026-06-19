@@ -11,24 +11,21 @@ import smtpModel from "../models/smtpModel.js";
 import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
 import dotenv from "dotenv";
 dotenv.config();
-import sgMail from '@sendgrid/mail';
+import sgMail from "@sendgrid/mail";
 import connectDb from "../db/connectDb.js";
 
-(
-  async () => {
- try{
-  await connectDb();
-  console.log("Connected to the database");
- }catch(error){
-  console.error("Error connecting to the database:", error);
- }
+(async () => {
+  try {
+    await connectDb();
+    console.log("Connected to the database");
+  } catch (error) {
+    console.error("Error connecting to the database:", error);
   }
-)();
+})();
 
 const transportCache = new Map();
- const getTransporter = async (smtpDetails) => {
+const getTransporter = async (smtpDetails) => {
   const cacheKey = smtpDetails.smtpId;
-
 
   const disabledSMTP = await redisConfig.exists(`disabledSMTPs:${cacheKey}`);
 
@@ -41,7 +38,6 @@ const transportCache = new Map();
     transportCache.get(cacheKey).lastUsed = new Date();
     return transportCache.get(cacheKey).transporter;
   }
-
 
   console.log("creating new transporter");
 
@@ -70,24 +66,20 @@ const transportCache = new Map();
   return transporter;
 };
 
- const clearTransportCache = () => {
-
-for (const key of transportCache.keys()) {
-const transporter = transportCache.get(key);
-console.log('transporter:', transporter.lastUsed);
-if(Date.now() - transporter.lastUsed > 1000*60*5)//5 minutes
-  {
-    transporter.transporter.close();
-    transportCache.delete(key);
-    console.log(`Deleted expired SMTP transporter for ${key}`);
+const clearTransportCache = () => {
+  for (const key of transportCache.keys()) {
+    const transporter = transportCache.get(key);
+    console.log("transporter:", transporter.lastUsed);
+    if (Date.now() - transporter.lastUsed > 1000 * 60 * 5) //5 minutes
+    {
+      transporter.transporter.close();
+      transportCache.delete(key);
+      console.log(`Deleted expired SMTP transporter for ${key}`);
+    }
   }
-  }
-
 };
 
-
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 
 let counter = 0;
 const worker = new Worker(
@@ -140,7 +132,8 @@ const appendPlatformDisclaimer = ({ text, html, userEmail }) => {
   const htmlFooter = `<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 12px;" /><p style="font-size:11px;color:#6b7280;line-height:1.5;margin:0;"><strong>Disclaimer:</strong> This email was sent through the Ehulak platform. Ehulak is not responsible for the content of this message. This email is associated with the account <a href="mailto:${userEmail}" style="color:#6b7280;">${userEmail}</a>.</p>`;
 
   const baseText = text || "";
-  const baseHtml = html || (baseText ? `<p>${baseText.replace(/\n/g, "<br>")}</p>` : "");
+  const baseHtml =
+    html || (baseText ? `<p>${baseText.replace(/\n/g, "<br>")}</p>` : "");
 
   return {
     text: baseText + textFooter,
@@ -154,7 +147,7 @@ const getEmailFields = (emailData) => {
   console.log("Payload:", JSON.stringify(payload));
   return {
     to: payload.to,
-    from: 'noreply@ehulak.tech',
+    from: "noreply@ehulak.tech",
     subject: payload.subject,
     text: payload.text || payload.body,
     body: payload.body || payload.text,
@@ -179,97 +172,107 @@ const sendEmail = async (jobData, workerHistory) => {
     html: fields.html,
     campaign: fields.campaign,
   };
-try{
+  try {
+    let customSMTP = false;
+    let smtpDetails = {};
+    // check if user is using custom SMTP
 
-  let customSMTP = false;
-  let smtpDetails={};
-// check if user is using custom SMTP
+    console.log("user id:", fields.userId);
 
-console.log('user id:', fields.userId);
+    if (fields.type === "internal") {
+      await sgMail.send(mailOptions);
+      console.log("Email sent successfully to:", JSON.stringify(mailOptions));
+      return true;
+    }
+    const user = await userModel.findOne({ userId: fields.userId });
+    console.log("user:", JSON.stringify(user));
 
-if(fields.type === "internal"){
-  await sgMail.send(mailOptions);
-  console.log("Email sent successfully to:", JSON.stringify(mailOptions));
-  return true;
-}
-const user = await userModel.findOne({ userId: fields.userId });
-console.log('user:', JSON.stringify(user));
+    if (!user) {
+      console.error("User not found");
+      throw new Error("User not found");
+    }
 
-if(!user){
-  console.error("User not found");
-  throw new Error("User not found");
-}
+    if (user.useCustomSMTP) {
+      const smtp = await smtpModel.findOne({ userId: fields.userId });
+      console.log("smtp:", JSON.stringify(smtp));
+      if (!smtp) {
+        console.error("Custom SMTP enabled but config not found");
 
-if (user.useCustomSMTP) {
-  const smtp = await smtpModel.findOne({ userId: fields.userId });
-  console.log('smtp:', JSON.stringify(smtp));
-  if (!smtp) {
-    console.error("Custom SMTP enabled but config not found");
+        throw new Error("Custom SMTP enabled but config not found");
+      }
+      customSMTP = true;
 
-    throw new Error("Custom SMTP enabled but config not found");
-  }
-  customSMTP = true;
+      console.log("smtp port:", smtp.port);
+      smtpDetails = {
+        userId: fields.userId,
+        host: decrypt(smtp.hostname),
+        from: smtp.from,
+        smtpId: smtp.smtpId,
+        port: smtp.port,
+        username: decrypt(smtp.username),
+        password: decrypt(smtp.password),
+      };
+      console.log("smtpDetails:", JSON.stringify(smtpDetails));
 
-  console.log('smtp port:', smtp.port);
-  smtpDetails = {
-    userId: fields.userId,
-    host: decrypt(smtp.hostname),
-    from: smtp.from,
-    smtpId: smtp.smtpId,
-    port: smtp.port,
-    username: decrypt(smtp.username),
-    password: decrypt(smtp.password),
-  };
-  console.log('smtpDetails:', JSON.stringify(smtpDetails));
+      const transporter = await getTransporter(smtpDetails);
+      mailOptions.from = smtpDetails.from;
+      await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully");
+      return true;
+    } else {
+      const withDisclaimer = appendPlatformDisclaimer({
+        text: mailOptions.text,
+        html: mailOptions.html,
+        userEmail: user.email,
+      });
+      mailOptions.text = withDisclaimer.text;
+      mailOptions.html = withDisclaimer.html;
 
-  const transporter = await getTransporter(smtpDetails);
-mailOptions.from = smtpDetails.from;
-  await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+      // await sgMail.send(mailOptions);
+
+      let defaultSMTP = {
+        userID: "system_hostinger",
+        from: "support@ehulak.tech",
+        smtpId: "system_hostinger",
+        host: process.env.DEFAULT_SMTP_HOST,
+        port: parseInt(process.env.DEFAULT_SMTP_PORT),
+        username: process.env.DEFAULT_SMTP_USER,
+        password: process.env.DEFAULT_SMTP_PASSWORD,
+      };
+
+      const transporter = await getTransporter(defaultSMTP);
+      await transporter.sendMail(mailOptions);
+
+      console.log("Email sent successfully to:", JSON.stringify(mailOptions));
+    }
+    sentEmailQueue.add(
+      "sentEmail",
+      {
+        customSMTP: customSMTP,
+        from: customSMTP ? smtpDetails.from : fields.from,
+        to: fields.to,
+        subject: fields.subject,
+        body: customSMTP ? fields.body : mailOptions.text,
+        html: customSMTP ? fields.html : mailOptions.html,
+        campaign: fields.campaign,
+        userId: fields.userId,
+        messageId: fields.messageId,
+        sentAt: new Date(),
+        workerHistory: appendWorkerPickup(workerHistory, {
+          worker: "sentEmailWorker",
+          timestamp: new Date(),
+          status: "picked_up",
+        }),
+      },
+      {
+        removeOnComplete: true,
+      },
+    );
     return true;
-
-}
-
-else{
-
-  const withDisclaimer = appendPlatformDisclaimer({
-    text: mailOptions.text,
-    html: mailOptions.html,
-    userEmail: user.email,
-  });
-  mailOptions.text = withDisclaimer.text;
-  mailOptions.html = withDisclaimer.html;
-  await sgMail.send(mailOptions);
-  console.log("Email sent successfully to:", JSON.stringify(mailOptions));
-}
-  sentEmailQueue.add(
-    "sentEmail",
-    {
-      customSMTP: customSMTP,
-      from: customSMTP ? smtpDetails.from : fields.from,
-      to: fields.to,
-      subject: fields.subject,
-      body: customSMTP ? fields.body : mailOptions.text,
-      html: customSMTP ? fields.html : mailOptions.html,
-      campaign: fields.campaign,
-      userId: fields.userId,
-      messageId: fields.messageId,
-      sentAt: new Date(),
-      workerHistory: appendWorkerPickup(workerHistory, {
-        worker: "sentEmailWorker",
-        timestamp: new Date(),
-        status: "picked_up",
-      }),
-    },
-    {
-      removeOnComplete: true,
-    },
-  );
-  return true;
-}catch(error){
-  console.error("Error sending email:", error);
-  throw error;
-}
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
 };
 
 worker.on("failed", (job, err) => {
@@ -295,5 +298,5 @@ worker.on("failed", (job, err) => {
 
 setInterval(() => {
   clearTransportCache();
-  console.log('transportCache cleared');
-}, 1000*60); // 1 minute
+  console.log("transportCache cleared");
+}, 1000 * 60); // 1 minute
