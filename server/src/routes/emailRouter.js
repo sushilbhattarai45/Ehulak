@@ -10,8 +10,13 @@ import {
 } from "../controllers/emailController.js";
 import { rateLimitMiddleware } from "../middlewares/rateLimitMiddleware.js";
 import { emailMiddleware } from "../middlewares/emailMiddleware.js";
-import { authMiddleware } from "../middlewares/authMiddleware.js";  
-emailRouter.post("/processEmail", rateLimitMiddleware, emailMiddleware, processEmail);
+import { authMiddleware } from "../middlewares/authMiddleware.js";
+emailRouter.post(
+  "/processEmail",
+  rateLimitMiddleware,
+  emailMiddleware,
+  processEmail,
+);
 
 emailRouter.get("/getDLQEmails", authMiddleware, getDLQEmails);
 

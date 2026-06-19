@@ -33,8 +33,9 @@ export const emailMiddleware = async (req, res, next) => {
       const isCustomSMTP = await redisConfig.get(
         `isCustomSMTP:${cachedData.userId}`,
       );
-      req.isCustomSMTP = isCustomSMTP || false;
-      if (!isCustomSMTP) {
+      console.log("isCustomSMTP:", isCustomSMTP);
+      req.isCustomSMTP = Boolean(isCustomSMTP) || false;
+      if (!Boolean(isCustomSMTP)) {
         const emailCount = await redisConfig.get(
           `emailCount:${cachedData.userId}`,
         );
@@ -68,9 +69,9 @@ export const emailMiddleware = async (req, res, next) => {
     const isCustomSMTP = await redisConfig.get(
       `isCustomSMTP:${apiKeyRecord.userId}`,
     );
-    req.isCustomSMTP = isCustomSMTP || false;
+    req.isCustomSMTP = Boolean(isCustomSMTP) || false;
 
-    if (!isCustomSMTP) {
+    if (!Boolean(isCustomSMTP)) {
       const emailCount = await redisConfig.get(
         `emailCount:${apiKeyRecord.userId}`,
       );

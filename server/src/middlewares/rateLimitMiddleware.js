@@ -48,11 +48,9 @@ export const rateLimitMiddleware = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error in rateLimitMiddleware:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error from rate limit middleware",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error from rate limit middleware",
+    });
   }
 };
