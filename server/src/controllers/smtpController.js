@@ -9,6 +9,7 @@ import { z, ZodError } from "zod";
 import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
 import { producer } from "../kafka/producer.js";
 import nodemailer from "nodemailer";
+import userModel from "../models/userModel.js";
 
 const testSMTP = async (data) => {
   try {
