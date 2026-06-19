@@ -51,9 +51,10 @@ export async function processEmail(req, res) {
         issues: z.flattenError(error).fieldErrors,
       });
     } else {
-      return res
-        .status(500)
-        .json({ error: "Internal Server Error from email controller" });
+      return res.status(500).json({
+        error: "Internal Server Error from email controller",
+        message: error.message,
+      });
     }
   }
 }
