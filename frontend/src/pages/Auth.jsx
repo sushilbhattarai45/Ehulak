@@ -306,8 +306,10 @@ export default function Auth() {
                 </button>
               </form>
 
-              <div className="mt-5 text-center text-[11px] text-muted-foreground">
-                By continuing you agree to our Terms and Privacy Policy.
+              <div className="mt-5 text-center text-[11px] text-muted-foreground leading-relaxed">
+                By creating an account or continuing to use Ehulak, you agree not to send harmful,
+                abusive, discriminatory, misleading, or illegal email. Ehulak is not responsible for
+                the content you send through the platform.
               </div>
             </div>
           </div>

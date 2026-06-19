@@ -14,6 +14,7 @@ const SECTIONS = [
   { id: "smtp", label: "SMTP" },
   { id: "quick-start", label: "Quick Start" },
   { id: "getting-started", label: "Getting Started" },
+  { id: "acceptable-use", label: "Acceptable Use" },
   { id: "api-key", label: "API Key" },
   { id: "send-email", label: "Send Email" },
   { id: "rate-limits", label: "Rate Limits" },
@@ -147,7 +148,7 @@ function DocsBody({ withPageHeader = false }) {
                   By default, every email goes through Ehulak&apos;s shared mail server. Recipients
                   see{" "}
                   <code className="font-mono text-foreground bg-muted px-1 py-0.5 rounded text-[12px]">
-                    noreply@ehulak.tech
+                    support@ehulak.tech
                   </code>{" "}
                   as the sender. No extra setup is required. All accounts can send up to{" "}
                   <strong className="text-foreground font-normal">10 emails per minute</strong> and{" "}
@@ -325,6 +326,30 @@ sendFirstEmail();`}</Code>
               </ol>
               <p>
                 The base URL for every request is <code>{API_BASE}</code>.
+              </p>
+            </Section>
+
+            <Section id="acceptable-use" title="Acceptable Use">
+              <p>
+                By creating an account or using Ehulak, you agree to use the service responsibly.
+                Emails sent through the platform should be lawful, respectful, and relevant to the
+                recipients who receive them.
+              </p>
+              <p>You must not use Ehulak to send:</p>
+              <ul>
+                <li>Harassment, threats, hate speech, or discriminatory content.</li>
+                <li>Scams, phishing, malware, deceptive messages, or impersonation attempts.</li>
+                <li>Spam or messages to people who did not agree to receive them.</li>
+                <li>Illegal content or email that supports harmful activity.</li>
+              </ul>
+              <p>
+                You are responsible for the content you send, the recipients you contact, and the
+                sender information you configure. Ehulak provides the delivery platform, but it does
+                not endorse, verify, or take responsibility for user-generated email content.
+              </p>
+              <p>
+                Accounts that abuse the service, harm recipients, or violate these rules may be
+                limited, disabled, or removed.
               </p>
             </Section>
 

@@ -147,7 +147,7 @@ const getEmailFields = (emailData) => {
   console.log("Payload:", JSON.stringify(payload));
   return {
     to: payload.to,
-    from: "noreply@ehulak.tech",
+    from: "support@ehulak.tech",
     subject: payload.subject,
     text: payload.text || payload.body,
     body: payload.body || payload.text,
