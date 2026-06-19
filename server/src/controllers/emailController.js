@@ -3,7 +3,7 @@ import { producer } from "../kafka/producer.js";
 import dlqEmailModel from "../models/dlqEmails.js";
 import sentEmailModel from "../models/sentEmailModel.js";
 import mongoose from "mongoose";
-
+import redisConfig from "../config/redisConfig.js";
 let count = 0;
 import { z, ZodError } from "zod";
 
