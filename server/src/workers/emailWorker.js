@@ -225,6 +225,7 @@ const sendEmail = async (jobData, workerHistory) => {
         html: mailOptions.html,
         userEmail: user.email,
       });
+      mailOptions.from = "support@ehulak.tech";
       mailOptions.text = withDisclaimer.text;
       mailOptions.html = withDisclaimer.html;
 
