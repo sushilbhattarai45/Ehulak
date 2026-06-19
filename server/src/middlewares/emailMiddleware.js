@@ -90,7 +90,10 @@ export const emailMiddleware = async (req, res, next) => {
     console.error("Error in emailMiddleware:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Internal server error" });
+      .json({
+        success: false,
+        message: "Internal server error from email middleware",
+      });
   }
 };
 
