@@ -7,7 +7,7 @@ import redisConfig from "../config/redisConfig.js";
 import {
   isDisposableEmail,
   isDisposableEmailDomain,
-} from 'disposable-email-domains-js';
+} from "disposable-email-domains-js";
 import bcrypt from "bcrypt";
 import { producer } from "../kafka/producer.js";
 
@@ -114,7 +114,6 @@ export const refreshToken = (req, res) => {
     }
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     const newAccessToken = jwt.sign(
-
       { userId: decoded.userId },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
@@ -141,18 +140,16 @@ export const refreshToken = (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-if(!email || !password)
-{
-  return res.status(400).json({
-    success: false,
-    message: "Email and password are required",
-  });
-}
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
 
     let emailDomain = email.split("@")[1];
 
-    if (emailDomain !="gmail.com")
-    {
+    if (emailDomain != "gmail.com") {
       return res.status(400).json({
         success: false,
         message: "Only Gmail accounts are allowed to prevent abuse.",
@@ -162,8 +159,6 @@ if(!email || !password)
     let cachedUser = await redisConfig.get(`user:${email}`);
     let user;
     console.log("Login attempt for email:", email);
-
-
 
     console.log("Checking Redis cache for user:", cachedUser);
     if (cachedUser) {
@@ -181,9 +176,6 @@ if(!email || !password)
         });
       }
 
-
-
-      
       // 3. Cache user
       await redisConfig.set(`user:${email}`, JSON.stringify(user), "EX", 3600);
     }
@@ -214,13 +206,12 @@ if(!email || !password)
       });
     }
 
-  if( user.status !="active")
-  {
-    return res.status(401).json({
-      success: false,
-      message: "User is not active",
-    });
-  }
+    if (user.status != "active") {
+      return res.status(401).json({
+        success: false,
+        message: "User is not active",
+      });
+    }
 
     let firstTimeLogin = user.firstTimeLogin;
     if (firstTimeLogin === undefined) {
@@ -268,17 +259,15 @@ export const registerUser = async (req, res) => {
         message: "Password is required for local accounts",
       });
     }
-   
+
     let emailDomain = email.split("@")[1];
 
-    if (emailDomain !="gmail.com")
-    {
+    if (emailDomain != "gmail.com") {
       return res.status(400).json({
         success: false,
         message: "Only Gmail accounts are allowed to prevent abuse.",
       });
     }
-
 
     // 3. Check DB first (source of truth)
     //check redis
@@ -455,7 +444,6 @@ export const updateUser = async (req, res) => {
         success: false,
         message: "User not found",
       });
-
     }
 
     console.log(req.body);
@@ -473,13 +461,18 @@ export const updateUser = async (req, res) => {
     // Update Redis cache
     await redisConfig.set(`user:${user.email}`, JSON.stringify(user));
 
+    if (user.useCustomSMTP) {
+      await redisConfig.set(`isCustomSMTP:${user.userId}`, true);
+    } else {
+      await redisConfig.del(`isCustomSMTP:${user.userId}`);
+    }
     return res.json({
       success: true,
       message: "User updated successfully",
       user: {
         userId: user.userId,
         email: user.email,
-        status: 'active',
+        status: "active",
         name: user.name,
         image: user.image,
         accountType: user.accountType,
@@ -498,53 +491,49 @@ export const updateUser = async (req, res) => {
   }
 };
 
-
 export const createOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-      let emailDomain = email.split("@")[1];
+    let emailDomain = email.split("@")[1];
 
-      if (emailDomain !="gmail.com")
-      {
-        return res.status(400).json({
-          success: false,
-          message: "Only Gmail accounts are allowed to prevent abuse.",
-        });
-      }
+    if (emailDomain != "gmail.com") {
+      return res.status(400).json({
+        success: false,
+        message: "Only Gmail accounts are allowed to prevent abuse.",
+      });
+    }
 
     console.log("Creating OTP for email:", email);
     //generate a 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000);
     console.log("OTP:", otp);
-// set the OTP in redis with the email as the key and the OTP as the value and the expiration time as 5 minutes
+    // set the OTP in redis with the email as the key and the OTP as the value and the expiration time as 5 minutes
     await redisConfig.set(`otp:${email}`, otp, "EX", 60 * 5);
 
-
-await producer({
-  type: "email",
-  action: "sendEmail",
-  emailData: {
-    type:"internal",
-    from: "noreply@ehulak.tech",
-    to: email,
-    campaign: "OTP for login",
-    subject: "OTP for login from Ehulak",
-    body: `Your OTP for login is ${otp}`,
-    html:`"<div style=\"margin:0;padding:0;background:#0b0f1a;font-family:Arial,sans-serif;\"><div style=\"max-width:600px;margin:40px auto;background:#111827;border-radius:0px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);\"><div style=\"background:linear-gradient(135deg,#6d28d9,#2563eb);padding:30px;text-align:center;color:white;\"><h1 style=\"margin:0;font-size:24px;\">Ehulak Security Code</h1><p style=\"margin:8px 0 0;opacity:0.9;\">One-Time Password Verification</p></div><div style=\"padding:40px;text-align:center;color:#e5e7eb;\"><p style=\"font-size:16px;margin-bottom:20px;color:#9ca3af;\">Use the OTP below to continue your action</p><div style=\"font-size:36px;letter-spacing:8px;font-weight:bold;background:#0f172a;padding:16px 20px;border-radius:12px;display:inline-block;border:1px solid #1f2937;\">
+    await producer({
+      type: "email",
+      action: "sendEmail",
+      emailData: {
+        type: "internal",
+        from: "noreply@ehulak.tech",
+        to: email,
+        campaign: "OTP for login",
+        subject: "OTP for login from Ehulak",
+        body: `Your OTP for login is ${otp}`,
+        html: `"<div style=\"margin:0;padding:0;background:#0b0f1a;font-family:Arial,sans-serif;\"><div style=\"max-width:600px;margin:40px auto;background:#111827;border-radius:0px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);\"><div style=\"background:linear-gradient(135deg,#6d28d9,#2563eb);padding:30px;text-align:center;color:white;\"><h1 style=\"margin:0;font-size:24px;\">Ehulak Security Code</h1><p style=\"margin:8px 0 0;opacity:0.9;\">One-Time Password Verification</p></div><div style=\"padding:40px;text-align:center;color:#e5e7eb;\"><p style=\"font-size:16px;margin-bottom:20px;color:#9ca3af;\">Use the OTP below to continue your action</p><div style=\"font-size:36px;letter-spacing:8px;font-weight:bold;background:#0f172a;padding:16px 20px;border-radius:12px;display:inline-block;border:1px solid #1f2937;\">
     
     ${otp}</div><p style=\"margin-top:25px;font-size:14px;color:#6b7280;\">This code will expire in 10 minutes. Do not share it with anyone.</p><a href=\"#\" style=\"display:inline-block;margin-top:25px;padding:12px 20px;background:#2563eb;color:white;text-decoration:none;border-radius:8px;font-weight:bold;\">Secure Account</a></div><div style=\"padding:20px;text-align:center;font-size:12px;color:#6b7280;border-top:1px solid #1f2937;\">Sent from <b>noreply@ehulak.tech</b></div></div></div>"
 }`,
-    userId: "1234567890",
-  },
-});
-
+        userId: "1234567890",
+      },
+    });
 
     return res.json({
       success: true,
-      message: "OTP created successfully", otp: otp    });
-    
-
+      message: "OTP created successfully",
+      otp: otp,
+    });
   } catch (error) {
     console.error("Create OTP error:", error);
     return res
@@ -574,7 +563,8 @@ export const validateOTP = async (req, res) => {
     return res.json({ success: true, message: "OTP validated successfully" });
   } catch (error) {
     console.error("Validate OTP error:", error);
-    return res.status(500)
+    return res
+      .status(500)
       .json({ success: false, message: "Internal server error" });
   }
 };

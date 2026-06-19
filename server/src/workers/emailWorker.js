@@ -241,6 +241,9 @@ const sendEmail = async (jobData, workerHistory) => {
         password: process.env.DEFAULT_SMTP_PASSWORD,
       };
 
+      //setting the number of emails sent by a user using default SMTP using redis
+      //increment the email count
+
       const transporter = await getTransporter(defaultSMTP);
       await transporter.sendMail(mailOptions);
 

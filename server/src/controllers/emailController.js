@@ -8,23 +8,15 @@ let count = 0;
 import { z, ZodError } from "zod";
 
 const schema = z.object({
-  to: z.string().includes('@'),
+  to: z.string().includes("@"),
 
-  subject: z
-    .string()
-    .min(1, { message: "Subject is required" }),
+  subject: z.string().min(1, { message: "Subject is required" }),
 
-  body: z
-    .string()
-    .min(1, { message: "Body is required" }),
+  body: z.string().min(1, { message: "Body is required" }),
 
-  html: z
-    .string()
-    .min(1, { message: "HTML content is required" }),
+  html: z.string().min(1, { message: "HTML content is required" }),
 
-  campaign: z
-    .string()
-    .min(1, { message: "Campaign name is required" }),
+  campaign: z.string().min(1, { message: "Campaign name is required" }),
 });
 export async function processEmail(req, res) {
   try {
@@ -48,9 +40,10 @@ export async function processEmail(req, res) {
       action: "sendEmail",
       emailData: data,
     });
-    res
-      .status(200)
-      .json({ message: `Email will be sent to ${to} shortly!` });
+
+    await redisConfig.incr(`emailCount:${req.user.userId}`, 1); //increment the email count
+
+    res.status(200).json({ message: `Email will be sent to ${to} shortly!` });
   } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json({
@@ -60,7 +53,7 @@ export async function processEmail(req, res) {
     } else {
       return res.status(500).json({ error: "Internal Server Error" });
     }
-}
+  }
 }
 export async function getDLQEmails(req, res) {
   try {

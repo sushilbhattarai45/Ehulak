@@ -25,19 +25,36 @@ export const rateLimitMiddleware = async (req, res, next) => {
       await redisConfig.expire(minuteKey, 60);
     }
 
-    if (hourlyCount > 20) {
+    if (hourlyCount > 100) {
       return res.status(403).json({
         success: false,
         message: "You have reached the maximum number of emails per hour.",
       });
     }
 
-    if (minuteCount > 5) {
+    if (minuteCount > 100) {
       return res.status(403).json({
         success: false,
         message: "You have reached the maximum number of emails per minute.",
       });
     }
+    //check user is using default SMTP
+    //check redis first if use has cust
+
+    const isCustomSMTP = await redisConfig.get(
+      `isCustomSMTP:${req.user.userId}`,
+    );
+    if (isCustomSMTP) {
+      const emailCount = await redisConfig.get(`emailCount:${req.user.userId}`);
+      if (emailCount > 5) {
+        return res.status(403).json({
+          success: false,
+          message: "You have reached the maximum number of emails per account.",
+        });
+      }
+    }
+
+    //if the user is using default SMTP, set a limit for the number of emails sent by the user
     console.log("RATE LIMIT MIDDLEWARE: Passed");
 
     next();
