@@ -33,7 +33,8 @@ export const emailMiddleware = async (req, res, next) => {
       const isCustomSMTP = await redisConfig.get(
         `isCustomSMTP:${cachedData.userId}`,
       );
-      if (isCustomSMTP) {
+      req.isCustomSMTP = isCustomSMTP || false;
+      if (!isCustomSMTP) {
         const emailCount = await redisConfig.get(
           `emailCount:${cachedData.userId}`,
         );
@@ -41,7 +42,7 @@ export const emailMiddleware = async (req, res, next) => {
           return res.status(403).json({
             success: false,
             message:
-              "You have reached the maximum number of emails per account.",
+              "You have reached the maximum number of emails per account using custom SMTP.",
           });
         }
       }
@@ -67,14 +68,17 @@ export const emailMiddleware = async (req, res, next) => {
     const isCustomSMTP = await redisConfig.get(
       `isCustomSMTP:${apiKeyRecord.userId}`,
     );
-    if (isCustomSMTP) {
+    req.isCustomSMTP = isCustomSMTP || false;
+
+    if (!isCustomSMTP) {
       const emailCount = await redisConfig.get(
         `emailCount:${apiKeyRecord.userId}`,
       );
       if (emailCount > 5) {
         return res.status(403).json({
           success: false,
-          message: "You have reached the maximum number of emails per account.",
+          message:
+            "You have reached the maximum number of emails per account using default SMTP.",
         });
       }
     }
@@ -88,12 +92,10 @@ export const emailMiddleware = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error in emailMiddleware:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error from email middleware",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error from email middleware",
+    });
   }
 };
 

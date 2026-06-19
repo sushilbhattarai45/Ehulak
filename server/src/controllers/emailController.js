@@ -41,7 +41,11 @@ export async function processEmail(req, res) {
       emailData: data,
     });
 
-    await redisConfig.incr(`emailCount:${req.user.userId}`, 1); //increment the email count
+    if (!req.isCustomSMTP) {
+      await redisConfig.incr(`emailCount:${req.user.userId}`);
+    }
+
+    //increment the email count
 
     res.status(200).json({ message: `Email will be sent to ${to} shortly!` });
   } catch (error) {
