@@ -149,9 +149,10 @@ function DocsBody({ withPageHeader = false }) {
                   <code className="font-mono text-foreground bg-muted px-1 py-0.5 rounded text-[12px]">
                     noreply@ehulak.tech
                   </code>{" "}
-                  as the sender. No extra setup is required. Platform sends are limited to{" "}
-                  <strong className="text-foreground font-normal">5 per minute</strong> and{" "}
-                  <strong className="text-foreground font-normal">60 per hour</strong> per API key.
+                  as the sender. No extra setup is required. All accounts can send up to{" "}
+                  <strong className="text-foreground font-normal">10 emails per minute</strong> and{" "}
+                  <strong className="text-foreground font-normal">100 per hour</strong>. Platform
+                  SMTP is capped at <strong className="text-foreground font-normal">50 emails per account</strong>.
                 </p>
               </div>
 
@@ -189,9 +190,9 @@ function DocsBody({ withPageHeader = false }) {
                 saved, but mail goes back through platform SMTP.
               </p>
               <p>
-                While custom SMTP is enabled, sends are limited to{" "}
-                <strong>20 emails per minute</strong> and <strong>200 per hour</strong> for now.
-                These limits will increase as we scale.
+                Custom SMTP uses the same account limits: <strong>10 emails per minute</strong>{" "}
+                and <strong>100 per hour</strong>. Use custom SMTP when you need to send beyond the
+                platform SMTP account cap.
               </p>
               <p>
                 To update settings, edit your saved entry or delete it before adding a new one. If
@@ -474,26 +475,25 @@ export async function sendEmail({ to,  subject, body, html, text, campaign }) {
 
             <Section id="rate-limits" title="Rate Limits">
               <p>
-                Send limits depend on whether you use platform SMTP or custom SMTP. All counters use
-                rolling time windows.
+                All accounts share the same request limits. Counters use rolling time windows.
               </p>
 
-              <h3>Platform SMTP (default)</h3>
-              <p>These limits apply to API requests when custom SMTP is off:</p>
+              <h3>Account limits</h3>
+              <p>These limits apply to email send requests for every account:</p>
               <div className="grid sm:grid-cols-2 gap-3 not-prose">
-                <RateCard label="Per minute" value="5" sub="requests / minute" />
-                <RateCard label="Per hour" value="60" sub="requests / hour" />
+                <RateCard label="Per minute" value="10" sub="emails / minute" />
+                <RateCard label="Per hour" value="100" sub="emails / hour" />
               </div>
 
-              <h3>Custom SMTP</h3>
-              <p>When custom SMTP is enabled, higher send limits apply through your mail server:</p>
-              <div className="grid sm:grid-cols-2 gap-3 not-prose">
-                <RateCard label="Per minute" value="20" sub="emails / minute" />
-                <RateCard label="Per hour" value="200" sub="emails / hour" />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Custom SMTP limits will increase as we scale. Contact support if you need more
-                capacity in the meantime.
+              <h3>Platform SMTP cap</h3>
+              <p>
+                The shared platform SMTP is available for the first{" "}
+                <strong>50 emails per account</strong>. After that, connect and enable your own
+                custom SMTP from{" "}
+                <Link to="/api-keys" className="text-primary hover:underline font-medium">
+                  SMTPs &amp; API Keys
+                </Link>{" "}
+                to keep sending.
               </p>
 
               <h3>What happens when you exceed a limit</h3>
@@ -510,13 +510,17 @@ export async function sendEmail({ to,  subject, body, html, text, campaign }) {
 }`}</Code>
               <p>
                 The minute window resets after <strong>60 seconds</strong> and the hour window
-                resets after <strong>3600 seconds</strong>. Counters are tracked per API key.
+                resets after <strong>3600 seconds</strong>. Counters are tracked per account.
               </p>
 
               <h3>Staying within the limits</h3>
               <ul>
-                <li>Send at most <strong>5 requests per minute</strong> per key.</li>
-                <li>Send at most <strong>60 requests per hour</strong> per key.</li>
+                <li>Send at most <strong>10 emails per minute</strong>.</li>
+                <li>Send at most <strong>100 emails per hour</strong>.</li>
+                <li>
+                  Platform SMTP is limited to <strong>50 emails per account</strong>. Set up custom
+                  SMTP when you need to send more through your own mail server.
+                </li>
                 <li>
                   If you receive the rate-limit error, wait until the window resets before sending
                   again.

@@ -25,14 +25,14 @@ export const rateLimitMiddleware = async (req, res, next) => {
       await redisConfig.expire(minuteKey, 60);
     }
 
-    if (hourlyCount > 100) {
+    if (hourlyCount >= 100) {
       return res.status(403).json({
         success: false,
         message: "You have reached the maximum number of emails per hour.",
       });
     }
 
-    if (minuteCount > 100) {
+    if (minuteCount >= 10) {
       return res.status(403).json({
         success: false,
         message: "You have reached the maximum number of emails per minute.",

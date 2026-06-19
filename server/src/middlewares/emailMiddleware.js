@@ -43,7 +43,7 @@ export const emailMiddleware = async (req, res, next) => {
         const emailCount = await redisConfig.get(
           `emailCount:${cachedData.userId}`,
         );
-        if (emailCount >= 5) {
+        if (emailCount >= 50) {
           return res.status(403).json({
             success: false,
             message:
@@ -81,7 +81,7 @@ export const emailMiddleware = async (req, res, next) => {
       const emailCount = await redisConfig.get(
         `emailCount:${apiKeyRecord.userId}`,
       );
-      if (emailCount >= 5) {
+      if (emailCount >= 50) {
         return res.status(403).json({
           success: false,
           message:

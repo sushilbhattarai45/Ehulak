@@ -17,7 +17,7 @@ import PublicPageShell from "../components/PublicPageShell.jsx";
 const FEATURES = [
   { icon: Zap, label: "Instant delivery", desc: "Queue + workers send in seconds" },
   { icon: Activity, label: "Live tracking", desc: "See every stage in real time" },
-  { icon: KeyRound, label: "Free to start", desc: "5/min and 60/hour at no cost" },
+  { icon: KeyRound, label: "Free to start", desc: "10/min and 100/hour at no cost" },
 ];
 
 const PIPELINE_STEPS = [
