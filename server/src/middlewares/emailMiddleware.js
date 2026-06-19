@@ -31,11 +31,11 @@ export const emailMiddleware = async (req, res, next) => {
 
       req.user = { userId: cachedData.userId };
       const isCustomSMTP = await redisConfig.get(
-        `isCustomSMTP:${req.user.userId}`,
+        `isCustomSMTP:${cachedData.userId}`,
       );
       if (isCustomSMTP) {
         const emailCount = await redisConfig.get(
-          `emailCount:${req.user.userId}`,
+          `emailCount:${cachedData.userId}`,
         );
         if (emailCount > 5) {
           return res.status(403).json({
@@ -65,10 +65,12 @@ export const emailMiddleware = async (req, res, next) => {
     req.user = { userId: apiKeyRecord.userId };
 
     const isCustomSMTP = await redisConfig.get(
-      `isCustomSMTP:${req.user.userId}`,
+      `isCustomSMTP:${apiKeyRecord.userId}`,
     );
     if (isCustomSMTP) {
-      const emailCount = await redisConfig.get(`emailCount:${req.user.userId}`);
+      const emailCount = await redisConfig.get(
+        `emailCount:${apiKeyRecord.userId}`,
+      );
       if (emailCount > 5) {
         return res.status(403).json({
           success: false,
