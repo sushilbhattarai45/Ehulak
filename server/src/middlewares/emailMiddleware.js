@@ -12,8 +12,6 @@ export const emailMiddleware = async (req, res, next) => {
         .json({ success: false, message: "API key missing" });
     }
 
-
-
     const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
     const cachedKey = await redisConfig.get(`apiKey:${keyHash}`);
     if (cachedKey) {
@@ -24,14 +22,29 @@ export const emailMiddleware = async (req, res, next) => {
           .status(403)
           .json({ success: false, message: "API key is not active" });
       }
-//  const isEmailSentPerAccount = await checkEmailSentPerAccount(cachedData.userId);
-//  if (isEmailSentPerAccount) {
-//   return res
-//     .status(403)
-//     .json({ success: false, message: "You have reached the maximum number of emails per account" });
-//  }
-      
+      //  const isEmailSentPerAccount = await checkEmailSentPerAccount(cachedData.userId);
+      //  if (isEmailSentPerAccount) {
+      //   return res
+      //     .status(403)
+      //     .json({ success: false, message: "You have reached the maximum number of emails per account" });
+      //  }
+
       req.user = { userId: cachedData.userId };
+      const isCustomSMTP = await redisConfig.get(
+        `isCustomSMTP:${req.user.userId}`,
+      );
+      if (isCustomSMTP) {
+        const emailCount = await redisConfig.get(
+          `emailCount:${req.user.userId}`,
+        );
+        if (emailCount > 5) {
+          return res.status(403).json({
+            success: false,
+            message:
+              "You have reached the maximum number of emails per account.",
+          });
+        }
+      }
       return next();
     }
 
@@ -50,13 +63,27 @@ export const emailMiddleware = async (req, res, next) => {
     }
 
     req.user = { userId: apiKeyRecord.userId };
-  //  const isEmailSentPerAccount = await checkEmailSentPerAccount(apiKeyRecord.userId);
-  //  if (isEmailSentPerAccount) {
-  //   return res
-  //     .status(403)
-  //     .json({ success: false, message: "You have reached the maximum number of emails per account" });
-  //  }
-     next();
+
+    const isCustomSMTP = await redisConfig.get(
+      `isCustomSMTP:${req.user.userId}`,
+    );
+    if (isCustomSMTP) {
+      const emailCount = await redisConfig.get(`emailCount:${req.user.userId}`);
+      if (emailCount > 5) {
+        return res.status(403).json({
+          success: false,
+          message: "You have reached the maximum number of emails per account.",
+        });
+      }
+    }
+
+    //  const isEmailSentPerAccount = await checkEmailSentPerAccount(apiKeyRecord.userId);
+    //  if (isEmailSentPerAccount) {
+    //   return res
+    //     .status(403)
+    //     .json({ success: false, message: "You have reached the maximum number of emails per account" });
+    //  }
+    next();
   } catch (error) {
     console.error("Error in emailMiddleware:", error);
     return res
@@ -67,14 +94,16 @@ export const emailMiddleware = async (req, res, next) => {
 
 const checkEmailSentPerAccount = async (userId) => {
   try {
-    const emailSentPerAccount = await redisConfig.get(`emailSentPerAccount:${userId}`);
-    console.log("_________________")
+    const emailSentPerAccount = await redisConfig.get(
+      `emailSentPerAccount:${userId}`,
+    );
+    console.log("_________________");
     console.log("Email sent per account:", emailSentPerAccount);
     await redisConfig.incr(`emailSentPerAccount:${userId}`);
 
     if (emailSentPerAccount > 2) {
       console.log("Email sent per account is greater than 2");
-    return true;
+      return true;
     }
     console.log("Email sent per account is less than 2");
     return false;
@@ -82,4 +111,4 @@ const checkEmailSentPerAccount = async (userId) => {
     console.error("Error in  Check Email Sent Per Account:", error);
     return true;
   }
-} 
+};
