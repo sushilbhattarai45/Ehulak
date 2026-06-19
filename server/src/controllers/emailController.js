@@ -42,6 +42,10 @@ export async function processEmail(req, res) {
     });
 
     if (!req.isCustomSMTP) {
+      console.log(
+        "Incrementing email count for user:",
+        req.user.userId + req.isCustomSMTP,
+      );
       await redisConfig.incr(`emailCount:${req.user.userId}`);
     }
 

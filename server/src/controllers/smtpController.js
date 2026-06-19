@@ -328,8 +328,7 @@ export const deleteSMTP = async (req, res) => {
     await smtpModel.deleteOne({ smtpId });
     await redisConfig.del(`smtp:${smtpId}`);
     //set to false in redis isCustomSMTP
-    await redisConfig.set(`isCustomSMTP:${smtp.userId}`, false);
-    // await redisConfig.del(`isCustomSMTP:${smtp.userId}`);
+    await redisConfig.del(`isCustomSMTP:${smtp.userId}`);
     await redisConfig.set(
       `disabledSMTPs:${smtpId}`,
       JSON.stringify({
