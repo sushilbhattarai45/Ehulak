@@ -461,7 +461,7 @@ export const updateUser = async (req, res) => {
     // Update Redis cache
     await redisConfig.set(`user:${user.email}`, JSON.stringify(user));
 
-    if (user.useCustomSMTP) {
+    if (Boolean(useCustomSMTP)) {
       await redisConfig.set(`isCustomSMTP:${user.userId}`, true);
       console.log("isCustomSMTP set to true");
     } else {
