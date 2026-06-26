@@ -10,6 +10,7 @@ import Logs from "./pages/Logs.jsx";
 import Docs from "./pages/Docs.jsx";
 import Auth from "./pages/Auth.jsx";
 import Landing from "./pages/Landing.jsx";
+import Privacy from "./pages/Privacy.jsx";
 
 // Context providers
 import { ThemeProvider } from "./hooks/useTheme.jsx";
@@ -41,6 +42,7 @@ export default function App() {
               </AuthRoute>
             } />
             <Route path="/docs" element={<Docs />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/emails/:id" element={<EmailDetails />} />

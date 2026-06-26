@@ -1,6 +1,7 @@
 import SiteHeader from "./SiteHeader.jsx";
 import DeveloperCredit from "./DeveloperCredit.jsx";
 import { classNames } from "../lib/format.js";
+import { Link } from "react-router-dom";
 
 const RADIAL_BG =
   "pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,oklch(0.72_0.14_155/0.12),transparent)]";
@@ -18,6 +19,11 @@ export function PublicFooter({ className = "max-w-5xl" }) {
     >
       <p className="text-center text-[11px] text-muted-foreground">
         Queue → worker → delivery · Built for teams who care about deliverability
+      </p>
+      <p className="text-center text-[11px]">
+        <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-base">
+          Privacy Policy and Terms of Use
+        </Link>
       </p>
       <DeveloperCredit />
     </footer>
