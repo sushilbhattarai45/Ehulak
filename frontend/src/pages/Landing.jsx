@@ -187,6 +187,14 @@ export default function Landing() {
               )}
             </div>
 
+            <p className="mt-3 text-center lg:text-left text-xs text-muted-foreground">
+              By using Ehulak, you agree to our{" "}
+              <Link to="/privacy" className="text-primary hover:underline underline-offset-4">
+                Privacy Policy and Terms of Use
+              </Link>
+              .
+            </p>
+
             <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto lg:mx-0">
               {FEATURES.map(({ icon: Icon, label, desc }) => (
                 <div
