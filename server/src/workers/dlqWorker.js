@@ -135,6 +135,5 @@ const flushBatch = async () => {
 };
 
 setInterval(() => {
-  console.log("Running scheduled flush of DLQ emails...");
   flushBatch();
 }, 10000); // 10000 ms = 10 seconds
