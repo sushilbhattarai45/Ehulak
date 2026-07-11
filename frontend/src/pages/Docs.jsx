@@ -157,7 +157,7 @@ function DocsBody({ withPageHeader = false }) {
                   </code>{" "}
                   address in your request. Mail is sent only to your{" "}
                   <strong className="text-foreground font-normal">account email</strong>, with a
-                  short disclaimer appended. Use this path to test the API. No extra setup is
+                  short disclaimer appended. Use custom SMTP to send emails to real recipients. Use this path to test the API. No extra setup is
                   required. All accounts can send up to{" "}
                   <strong className="text-foreground font-normal">10 emails per minute</strong> and{" "}
                   <strong className="text-foreground font-normal">100 per hour</strong>. Platform
