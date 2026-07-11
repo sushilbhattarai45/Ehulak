@@ -93,7 +93,6 @@ const sendToDlqDB = async (data) => {
 
 const length = 10;
 const batchEmails = async (data) => {
-  console.log("Batching emails for DLQ processing. Batch size:", data.length);
   //check if dlqemail has dat iun it or not
 
   const chevckData = await redisConfig.llen("dlqEmails");
