@@ -1,0 +1,36 @@
+kind: Deployment
+apiVersion: apps/v1
+
+metadata:
+  name: mainapi-deployment
+  labels:
+    app : mainapi-deployment
+
+    
+spec:
+  replicas: 2
+  
+  selector:
+    matchLabels:
+      app: mainapi
+    
+  template:
+    metadata:
+      labels: 
+        app: mainapi
+  
+
+    spec:
+      containers:
+      - name : mainapi
+        image: ehulak-server:latest
+        command: ['npm', 'start']
+        ports:
+        - containerPort: 3002
+        imagePullPolicy: IfNotPresent    
+
+
+
+
+
+
