@@ -494,7 +494,7 @@ export default function ApiKeys() {
       <div className="mt-14 pt-14 border-t border-border">
         <PageHeader
           title="Custom SMTP"
-          description="One SMTP server per account. When enabled, your mail is sent through your server; if that fails, the platform SMTP is used."
+          description="One SMTP server per account. When enabled, mail goes to real recipients through your server. Platform SMTP only delivers to your account email to prevent abuse."
           actions={
             smtp && !showSmtpForm ? (
               <div className="flex items-center gap-2">
@@ -540,8 +540,8 @@ export default function ApiKeys() {
             >
               {smtp
                 ? useCustomSMTP
-                  ? "Enabled. Your SMTP is used for sends. Platform SMTP is the fallback if it fails."
-                  : "Disabled. Your credentials stay saved, but sends use platform SMTP only."
+                  ? "Enabled. Mail is delivered to real recipients through your SMTP."
+                  : "Disabled. Credentials stay saved; platform SMTP only sends to your account email."
                 : "Add SMTP credentials below to enable this option."}
             </p>
           </div>

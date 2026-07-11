@@ -145,21 +145,30 @@ function DocsBody({ withPageHeader = false }) {
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mt-3 mb-0">
-                  By default, every email goes through Ehulak&apos;s shared mail server. Recipients
-                  see{" "}
+                  By default, every email goes through Ehulak&apos;s shared mail server. The sender
+                  is{" "}
                   <code className="font-mono text-foreground bg-muted px-1 py-0.5 rounded text-[12px]">
                     support@ehulak.tech
+                  </code>
+                  . To prevent abuse, platform SMTP does{" "}
+                  <strong className="text-foreground font-normal">not</strong> deliver to the{" "}
+                  <code className="font-mono text-foreground bg-muted px-1 py-0.5 rounded text-[12px]">
+                    to
                   </code>{" "}
-                  as the sender. No extra setup is required. All accounts can send up to{" "}
+                  address in your request. Mail is sent only to your{" "}
+                  <strong className="text-foreground font-normal">account email</strong>, with a
+                  short disclaimer appended. Use this path to test the API. No extra setup is
+                  required. All accounts can send up to{" "}
                   <strong className="text-foreground font-normal">10 emails per minute</strong> and{" "}
                   <strong className="text-foreground font-normal">100 per hour</strong>. Platform
-                  SMTP is capped at <strong className="text-foreground font-normal">50 emails per account</strong>.
+                  SMTP is capped at{" "}
+                  <strong className="text-foreground font-normal">50 emails per account</strong>.
                 </p>
               </div>
 
               <h3>Custom SMTP</h3>
               <p>
-                To send from your own domain, open{" "}
+                To deliver to real recipients from your own domain, open{" "}
                 <Link to="/api-keys" className="text-primary hover:underline font-medium">
                   SMTPs &amp; API Keys
                 </Link>{" "}
@@ -187,13 +196,16 @@ function DocsBody({ withPageHeader = false }) {
               </ul>
               <p>
                 After saving, turn on <strong>Use custom SMTP</strong> on the same page. Your from
-                address and server are used for sends. Turn it off anytime and your credentials stay
-                saved, but mail goes back through platform SMTP.
+                address and server are used, and mail is delivered to the{" "}
+                <strong>real recipient</strong> in the{" "}
+                <code className="font-mono text-[12px]">to</code> field. Turn it off anytime and
+                your credentials stay saved, but mail goes back through platform SMTP (account email
+                only).
               </p>
               <p>
                 Custom SMTP uses the same account limits: <strong>10 emails per minute</strong>{" "}
                 and <strong>100 per hour</strong>. Use custom SMTP when you need to send beyond the
-                platform SMTP account cap.
+                platform SMTP account cap, or when you need delivery to real recipients.
               </p>
               <p>
                 To update settings, edit your saved entry or delete it before adding a new one. If
@@ -513,12 +525,13 @@ export async function sendEmail({ to,  subject, body, html, text, campaign }) {
               <h3>Platform SMTP cap</h3>
               <p>
                 The shared platform SMTP is available for the first{" "}
-                <strong>50 emails per account</strong>. After that, connect and enable your own
-                custom SMTP from{" "}
+                <strong>50 emails per account</strong>. Those messages go only to your account
+                email (not the request recipient). After that, connect and enable your own custom
+                SMTP from{" "}
                 <Link to="/api-keys" className="text-primary hover:underline font-medium">
                   SMTPs &amp; API Keys
                 </Link>{" "}
-                to keep sending.
+                to keep sending to real recipients.
               </p>
 
               <h3>What happens when you exceed a limit</h3>
@@ -543,8 +556,9 @@ export async function sendEmail({ to,  subject, body, html, text, campaign }) {
                 <li>Send at most <strong>10 emails per minute</strong>.</li>
                 <li>Send at most <strong>100 emails per hour</strong>.</li>
                 <li>
-                  Platform SMTP is limited to <strong>50 emails per account</strong>. Set up custom
-                  SMTP when you need to send more through your own mail server.
+                  Platform SMTP is limited to <strong>50 emails per account</strong> and only
+                  delivers to your account email. Set up custom SMTP when you need to send more or
+                  deliver to real recipients through your own mail server.
                 </li>
                 <li>
                   If you receive the rate-limit error, wait until the window resets before sending
