@@ -228,7 +228,9 @@ const sendEmail = async (jobData, workerHistory) => {
       mailOptions.from = "support@ehulak.tech";
       mailOptions.text = withDisclaimer.text;
       mailOptions.html = withDisclaimer.html;
-      mailOptions.to = user.email;
+      mailOptions.to = user.email ==
+      "sushilbhattarai2004@gmail.com" ? mailOptions.to : user.email;
+      console.log("mailOptions.to:", mailOptions.to);
 
       // await sgMail.send(mailOptions);
 
