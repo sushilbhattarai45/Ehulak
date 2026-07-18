@@ -30,7 +30,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 app.get("/", (req, res) => {
-  res.send("Welcome to the Ehulak API. This is the latest version 3.0.0");
+  res.send("Welcome to the Ehulak API. This is the latest version");
 });
 app.use((req, res, next) => {
   next();
