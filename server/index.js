@@ -32,6 +32,9 @@ app.listen(PORT, () => {
 app.get("/", (req, res) => {
   res.send("Welcome to the Ehulak API. This is the latest version");
 });
+app.get("/health", (req, res) => {
+  res.send("Healthy");
+});
 app.use((req, res, next) => {
   next();
 });
