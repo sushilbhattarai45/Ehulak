@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /emails
+Disallow: /campaigns
+Disallow: /dlq
+Disallow: /analytics
+Disallow: /api-keys
+Disallow: /logs
+Disallow: /auth
+
+Sitemap: https://ehulak.tech/sitemap.xml

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import StatusBadge from "../components/StatusBadge.jsx";
 import PublicPageShell from "../components/PublicPageShell.jsx";
+import { usePageSeo } from "../hooks/usePageSeo.js";
 
 const FEATURES = [
   { icon: Zap, label: "Instant delivery", desc: "Queue + workers send in seconds" },
@@ -113,6 +114,12 @@ function PipelinePreview() {
 
 export default function Landing() {
   const { user, loading } = useAuth();
+  usePageSeo({
+    title: "Ehulak — Instant, Free Email Delivery Service",
+    description:
+      "Ehulak is a free API-first email delivery service. Send emails instantly with queues, automatic retries, a dead letter queue, and live tracking.",
+    path: "/",
+  });
   if (loading) return null;
 
   return (

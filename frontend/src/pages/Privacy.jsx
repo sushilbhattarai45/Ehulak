@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
 import PublicPageShell from "../components/PublicPageShell.jsx";
+import { usePageSeo } from "../hooks/usePageSeo.js";
 
 const PRIVACY_SECTIONS = [
   {
@@ -147,6 +148,12 @@ const TERMS_SECTIONS = [
 ];
 
 export default function Privacy() {
+  usePageSeo({
+    title: "Privacy Policy and Terms of Use — Ehulak",
+    description:
+      "How Ehulak collects, uses, and protects account, email, and delivery data, plus the terms of use for the service.",
+    path: "/privacy",
+  });
   return (
     <PublicPageShell
       headerVariant="docs"

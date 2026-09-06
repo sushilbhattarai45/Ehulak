@@ -6,6 +6,7 @@ import PublicPageShell from "../components/PublicPageShell.jsx";
 import Sidebar from "../layout/Sidebar.jsx";
 import Topbar from "../layout/Topbar.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { usePageSeo } from "../hooks/usePageSeo.js";
 import { classNames } from "../lib/format.js";
 
 const API_BASE = "https://api.ehulak.tech";
@@ -24,6 +25,12 @@ const SECTIONS = [
 
 export default function Docs() {
   const { user } = useAuth();
+  usePageSeo({
+    title: "Documentation — Ehulak",
+    description:
+      "Learn how to send email with the Ehulak API, create API keys, configure SMTP, track delivery, and recover failed messages from the dead letter queue.",
+    path: "/docs",
+  });
 
   if (user) {
     return (

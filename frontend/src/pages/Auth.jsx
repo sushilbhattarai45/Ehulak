@@ -6,6 +6,7 @@ import { classNames } from "../lib/format.js";
 import { Mail, Zap, Activity, KeyRound } from "lucide-react";
 import Modal from "../components/Modal.jsx";
 import PublicPageShell from "../components/PublicPageShell.jsx";
+import { usePageSeo } from "../hooks/usePageSeo.js";
 import LogoMark from "../components/LogoMark.jsx";
 import {
   InputOTP,
@@ -20,6 +21,12 @@ const FEATURES = [
 ];
 
 export default function Auth() {
+  usePageSeo({
+    title: "Sign in — Ehulak",
+    description: "Sign in to Ehulak to send email, manage API keys, and track delivery.",
+    path: "/auth",
+    noindex: true,
+  });
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState(() =>
     searchParams.get("mode") === "signup" ? "signup" : "signin",
