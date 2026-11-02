@@ -20,11 +20,9 @@ services:
     command: node src/kafka/consumer/emailConsumer.js
     restart: unless-stopped
 
-
   email-worker:
     build: .
     image: ehulak-server
-
     container_name: email-worker
     command: node src/workers/emailWorker.js
     restart: unless-stopped
@@ -63,7 +61,7 @@ services:
     image: ehulak-server
     container_name: sent-email-worker
     command: node src/workers/sentEmailWorker.js
-    restart: unless-stopped 
+    restart: unless-stopped
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -73,7 +71,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       KAFKA_OPTS: "-Djdk.attach.allowAttachSelf=true"
-    
+
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
@@ -85,7 +83,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      
+
       # LISTENER CONFIG (simple + stable)
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
@@ -98,4 +96,3 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
-
