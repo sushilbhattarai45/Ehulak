@@ -11,7 +11,7 @@ import smtpModel from "../models/smtpModel.js";
 import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
 import dotenv from "dotenv";
 dotenv.config();
-import sgMail from "@sendgrid/mail";
+// import sgMail from "@sendgrid/mail";
 import connectDb from "../db/connectDb.js";
 
 (async () => {
@@ -79,7 +79,7 @@ const clearTransportCache = () => {
   }
 };
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 let counter = 0;
 const worker = new Worker(
@@ -180,7 +180,21 @@ const sendEmail = async (jobData, workerHistory) => {
     console.log("user id:", fields.userId);
 
     if (fields.type === "internal") {
-      await sgMail.send(mailOptions);
+      // await sgMail.send(mailOptions);
+      // console.log("Email sent successfully to:", JSON.stringify(mailOptions));
+      // return true;
+      mailOptions.from = "support@ehulak.tech";
+      let defaultSMTP = {
+        userID: "system_hostinger",
+        from: "support@ehulak.tech",
+        smtpId: "system_hostinger",
+        host: process.env.DEFAULT_SMTP_HOST,
+        port: parseInt(process.env.DEFAULT_SMTP_PORT),
+        username: process.env.DEFAULT_SMTP_USER,
+        password: process.env.DEFAULT_SMTP_PASSWORD,
+      };
+      const transporter = await getTransporter(defaultSMTP);
+      await transporter.sendMail(mailOptions);
       console.log("Email sent successfully to:", JSON.stringify(mailOptions));
       return true;
     }
