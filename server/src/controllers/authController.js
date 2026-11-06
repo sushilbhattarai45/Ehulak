@@ -525,10 +525,26 @@ export const createOTP = async (req, res) => {
         campaign: "OTP for login",
         subject: "OTP for login from Ehulak",
         body: `Your OTP for login is ${otp}`,
-        html: `"<div style=\"margin:0;padding:0;background:#0b0f1a;font-family:Arial,sans-serif;\"><div style=\"max-width:600px;margin:40px auto;background:#111827;border-radius:0px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);\"><div style=\"background:linear-gradient(135deg,#6d28d9,#2563eb);padding:30px;text-align:center;color:white;\"><h1 style=\"margin:0;font-size:24px;\">Ehulak Security Code</h1><p style=\"margin:8px 0 0;opacity:0.9;\">One-Time Password Verification</p></div><div style=\"padding:40px;text-align:center;color:#e5e7eb;\"><p style=\"font-size:16px;margin-bottom:20px;color:#9ca3af;\">Use the OTP below to continue your action</p><div style=\"font-size:36px;letter-spacing:8px;font-weight:bold;background:#0f172a;padding:16px 20px;border-radius:12px;display:inline-block;border:1px solid #1f2937;\">
-    
-    ${otp}</div><p style=\"margin-top:25px;font-size:14px;color:#6b7280;\">This code will expire in 10 minutes. Do not share it with anyone.</p><a href=\"#\" style=\"display:inline-block;margin-top:25px;padding:12px 20px;background:#2563eb;color:white;text-decoration:none;border-radius:8px;font-weight:bold;\">Secure Account</a></div><div style=\"padding:20px;text-align:center;font-size:12px;color:#6b7280;border-top:1px solid #1f2937;\">Sent from <b>noreply@ehulak.tech</b></div></div></div>"
-}`,
+        html: `<div style="margin:0;padding:0;background:#090e12;font-family:Arial,Helvetica,sans-serif;">
+  <div style="max-width:600px;margin:40px auto;background:#101419;border-radius:8px;overflow:hidden;border:1px solid #20252a;">
+    <div style="background:#101419;padding:28px 30px 20px;text-align:center;border-bottom:1px solid #20252a;">
+      <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.04em;color:#889098;">
+        <span style="color:#4ebe7d;font-weight:600;">e</span>-hulak · electronic post office
+      </p>
+      <h1 style="margin:0;font-size:22px;color:#eff2f5;font-weight:700;">Security Code</h1>
+      <p style="margin:8px 0 0;font-size:14px;color:#889098;">One-Time Password Verification</p>
+    </div>
+    <div style="padding:36px 30px;text-align:center;">
+      <p style="font-size:15px;margin:0 0 22px;color:#889098;">Use the OTP below to continue your action</p>
+      <div style="font-size:36px;letter-spacing:8px;font-weight:700;color:#4ebe7d;background:#1b2025;padding:16px 24px;border-radius:8px;display:inline-block;border:1px solid rgba(78,190,125,0.25);box-shadow:0 0 20px rgba(78,190,125,0.15);">${otp}</div>
+      <p style="margin:24px 0 0;font-size:13px;color:#889098;">This code will expire in 10 minutes. Do not share it with anyone.</p>
+      <a href="#" style="display:inline-block;margin-top:24px;padding:12px 20px;background:#4ebe7d;color:#061009;text-decoration:none;border-radius:8px;font-weight:700;font-size:14px;">Secure Account</a>
+    </div>
+    <div style="padding:18px 20px;text-align:center;font-size:12px;color:#889098;border-top:1px solid #20252a;">
+      Sent from <b style="color:#eff2f5;">noreply@ehulak.tech</b>
+    </div>
+  </div>
+</div>`,
         userId: "1234567890",
       },
     });
