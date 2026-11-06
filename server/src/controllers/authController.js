@@ -139,7 +139,10 @@ export const refreshToken = (req, res) => {
 
 export const login = async (req, res) => {
   try {
+    console.log("Login request received");
     const { email, password } = req.body;
+    console.log("Email:", email);
+    console.log("Password:", password);
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -331,6 +334,7 @@ export const registerUser = async (req, res) => {
 
 export const googleAuth = async (req, res) => {
   try {
+    console.log("Google auth request received");
     const { credential } = req.body;
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
